@@ -342,7 +342,7 @@ def init_arg_parser():
 
     addprofile_parser = subparsers.add_parser("addprofile", aliases=["-ap"], help="Add a new profile")
     addprofile_parser.add_argument("name", help="Name of the profile")
-    addprofile_parser.add_argument("copy", nargs="?", default=None, choices=["copy"], help="Copy current profile")
+    addprofile_parser.add_argument("copy", nargs="?", default=None, help="Copy current profile")
 
     switchprofile_parser = subparsers.add_parser("profile", aliases=["-p"], help="Switch to a different profile")
     switchprofile_parser.add_argument("name", help="Name of the profile")
