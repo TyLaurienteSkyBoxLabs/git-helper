@@ -118,7 +118,7 @@ def fetch_command():
     run_git_command(["reset", "--hard", f"origin/{main_branch}"])
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
-    run_git_command(["checkout", "-b", fetch_branch])
+    run_git_command(["checkout", fetch_branch])
 
     print("\nRebasing branch to {main_branch}")
     passed = run_git_command(["rebase", main_branch])
