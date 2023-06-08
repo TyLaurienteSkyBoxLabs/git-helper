@@ -284,6 +284,16 @@ def add_shortcut(shortcut_name, shortcut_command):
 
     print(f"Added shortcut '{shortcut_name}' to profile '{current_profile}'")
 
+# Function to replace variables in the command
+def replace_variables(command):
+    count = 0
+    while command.find("!*") != -1 and count < 20:
+        count += 1
+        if command.find("!*repo_path") != -1:
+            command = command.replace("!*repo_path", get_repo_path())
+
+    return command
+
 def execute_shortcut(shortcut_name):
     config = read_gith_config()
     current_profile = get_current_profile()
@@ -293,6 +303,7 @@ def execute_shortcut(shortcut_name):
         return
 
     shortcut_command = config.get(current_profile, shortcut_name)
+    shortcut_command = replace_variables(shortcut_command)
     print(f"\nExecuting shortcut '{shortcut_name}': {shortcut_command}")
     os.system(shortcut_command)
 
