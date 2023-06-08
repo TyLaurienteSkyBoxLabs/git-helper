@@ -148,6 +148,17 @@ def get_repo_branch_name():
     
     return None
 
+def clean_submodules():
+    # Get the list of submodules
+    result = subprocess.run(['git', 'submodule', '--quiet', 'foreach', 'echo $path'], capture_output=True, text=True)
+    submodule_paths = result.stdout.strip().split('\n')
+
+    # Clean each submodule
+    for path in submodule_paths:
+        submodule_dir = path.strip()
+        subprocess.run(['git', 'clean', '-ffdx'], cwd=submodule_dir)
+        subprocess.run(['git', 'checkout', '.'], cwd=submodule_dir)
+
 def clean_non_git_files():
     clean_command = get_git_command(["clean", "-ffdx"])
 
@@ -165,6 +176,8 @@ def clean_non_git_files():
     
     # Wait for the process to finish
     process.wait()
+
+    clean_submodules()
 
 def fetch_command(rebase=False):
     main_branch = get_branch_name()
