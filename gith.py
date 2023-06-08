@@ -6,7 +6,10 @@ import re
 import time
 import sys
 import pyautogui
+<<<<<<< HEAD
 import pytesseract
+=======
+>>>>>>> 8ca0f84 (Add ability to open and start distributed build in VS)
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 
