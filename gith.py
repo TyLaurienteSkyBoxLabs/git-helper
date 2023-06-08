@@ -95,8 +95,10 @@ def run_git_command(args):
     git_command = get_git_command(args)
     
     result = subprocess.run(git_command, capture_output=True, text=True)
-
     output = result.stdout
+
+    print(output)
+    
     if "CONFLICT" in output:
         return False
 
