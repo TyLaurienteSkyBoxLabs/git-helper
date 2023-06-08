@@ -70,12 +70,13 @@ def set_branch_name(branch_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def run_git_command(args, before_args=None):
+def get_git_command(args):
     repo_path = get_repo_path()
-    git_command = ["git", "-C", repo_path] + args
-    if before_args:
-        git_command = before_args + git_command
+    return ["git", "-C", repo_path] + args
 
+def run_git_command(args):
+    git_command = get_git_command(args)
+    
     result = subprocess.run(git_command, capture_output=True, text=True)
 
     output = result.stdout
@@ -83,7 +84,6 @@ def run_git_command(args, before_args=None):
         return False
 
     return True
-        
 
 def get_repo_branch_name():
     repo_path = get_repo_path()
@@ -131,7 +131,22 @@ def fetch_command():
     run_git_command(["submodule", "update", "--init", "--recursive"])
 
     print("\nCleaning non-git files")
-    run_git_command("no | ", ["clean", "-ffdx"])
+    clean_command = get_git_command(["clean", "-ffdx"])
+
+    process = subprocess.Popen(clean_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, universal_newlines=True)
+
+    # Read the stdout and stderr streams line by line
+    stdout, stderr = process.communicate()
+    for line in stdout.splitlines():
+        print(line)
+        # Check if the prompt "Would you like to try again (y/n)" is present
+        if "Would you like to try again (y/n)" in line:
+            # Automatically send "n" as the response
+            process.stdin.write("n\n")
+            process.stdin.flush()
+    
+    # Wait for the process to finish
+    process.wait()
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
