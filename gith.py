@@ -18,6 +18,23 @@ def set_current_profile(profile_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
+def delete_profile(profile_name):
+    config = read_gith_config()
+
+    if not config.has_section(profile_name):
+        print(f"Profile '{profile_name}' does not exist.")
+        return
+
+    config.remove_section(profile_name)
+
+    with open(GITH_CONFIG_FILE, "w") as config_file:
+        config.write(config_file)
+    
+    if get_current_profile() == profile_name:
+        set_current_profile("default")
+
+    print(f"Deleted profile: '{profile_name}'")
+
 def get_repo_path():
     config = read_gith_config()
     current_profile = get_current_profile()
@@ -229,8 +246,10 @@ def add_profile(profile_name, copy=False):
         if config.has_section(current_profile):
             options = config.options(current_profile)
             for option in options:
-                value = config.get(current_profile, option)
-                config.set(profile_name, option, value)
+                if option.find("current_profile") == -1:
+                    print(option)
+                    value = config.get(current_profile, option)
+                    config.set(profile_name, option, value)
 
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
@@ -238,15 +257,18 @@ def add_profile(profile_name, copy=False):
     set_current_profile(profile_name)
     print(f"Added new profile: '{profile_name}'")
 
-def switch_profile(profile_name):
+def switch_profile(profile_name, delete=False):
     config = read_gith_config()
 
     if not config.has_section(profile_name):
         print(f"Profile '{profile_name}' does not exist.")
         return
 
-    set_current_profile(profile_name)
-    print(f"Switched to profile: '{profile_name}'")
+    if delete:
+        delete_profile(profile_name)
+    else:
+        set_current_profile(profile_name)
+        print(f"Switched to profile: '{profile_name}'")
 
 def add_shortcut(shortcut_name, shortcut_command):
     config = read_gith_config()
@@ -341,10 +363,11 @@ def init_arg_parser():
     shortcut_parser.add_argument("shortcut_command", nargs="?", default=None, help="Command associated with the shortcut")
 
     addprofile_parser = subparsers.add_parser("addprofile", aliases=["-ap"], help="Add a new profile")
+    addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
     addprofile_parser.add_argument("name", help="Name of the profile")
-    addprofile_parser.add_argument("copy", nargs="?", default=None, help="Copy current profile")
 
     switchprofile_parser = subparsers.add_parser("profile", aliases=["-p"], help="Switch to a different profile")
+    switchprofile_parser.add_argument("delete", nargs="?", default=False, help="Delete a profile")
     switchprofile_parser.add_argument("name", help="Name of the profile")
 
     branchandshort_parser = subparsers.add_parser("branchandshort", aliases=["-bs"], help="Create a new branch and execute a shortcut command")
@@ -380,7 +403,7 @@ def main():
     elif args.command == "addprofile":
         add_profile(args.name, args.copy)
     elif args.command == "profile":
-        switch_profile(args.name)
+        switch_profile(args.name, args.delete)
     elif args.command == "branchandshort":
         branchandshort_command(args.branch_name, args.shortcut_name)
     elif args.command == "explorer":
