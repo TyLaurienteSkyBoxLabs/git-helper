@@ -100,7 +100,7 @@ def get_repo_branch_name():
     
     return None
 
-def fetch_command():
+def fetch_command(rebase=False):
     main_branch = get_branch_name()
     fetch_branch = get_repo_branch_name()
 
@@ -120,8 +120,13 @@ def fetch_command():
     print(f"\nChecking out the fetch branch: {fetch_branch}")
     run_git_command(["checkout", fetch_branch])
 
-    print("\nRebasing branch to {main_branch}")
-    passed = run_git_command(["rebase", main_branch])
+    passed = False
+    if rebase:
+        print(f"\nRebasing branch to {main_branch}")
+        passed = run_git_command(["rebase", main_branch])
+    else:
+        print(f"\Merging {main_branch} into {fetch_branch}")
+        passed = run_git_command(["merge", main_branch])
 
     if not passed:
         print("Could not rebase branch, there were conflicts")
@@ -322,7 +327,8 @@ def init_arg_parser():
 
     subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively")
 
-    subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
+    fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
+    fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
 
     mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
@@ -366,7 +372,7 @@ def main():
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
     elif args.command == "fetch":
-        fetch_command()
+        fetch_command(args.rebase)
     elif args.command == "branch":
         branch_command(args.name)
     elif args.command == "shortcut":
