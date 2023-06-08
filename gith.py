@@ -70,15 +70,59 @@ def set_branch_name(branch_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def run_git_command(args):
+def run_git_command(args, before_args=None):
     repo_path = get_repo_path()
     git_command = ["git", "-C", repo_path] + args
-    subprocess.run(git_command)
+    if before_args:
+        subprocess.run(before_args + git_command)
+    else:
+        subprocess.run(git_command)
+
+def get_repo_branch_name():
+    repo_path = get_repo_path()
+    if not repo_path:
+        return None
+
+    try:
+        git_command = ["git", "-C", repo_path, "rev-parse", "--abbrev-ref", "HEAD"]
+        result = subprocess.run(git_command, capture_output=True, text=True)
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+    
+    return None
+
+def fetch_command():
+    main_branch = get_branch_name()
+    fetch_branch = get_repo_branch_name()
+
+    print(f"Checking out main branch: {main_branch}")
+    run_git_command(["checkout", main_branch])
+
+    print("\nRunning 'git remote prune origin'")
+    run_git_command(["remote", "prune", "origin"])
+
+    print(f"\nFetching latest changes for branch: {main_branch}")
+    run_git_command(["fetch", "origin", main_branch])
+    run_git_command(["fetch", "origin", main_branch])
+
+    print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
+    run_git_command(["reset", "--hard", f"origin/{main_branch}"])
+
+    print(f"\nChecking out the fetch branch: {fetch_branch}")
+    run_git_command(["checkout", "-b", fetch_branch])
+
+    print("\nInitializing and updating submodules")
+    run_git_command(["submodule", "update", "--init", "--recursive"])
+
+    print("\nCleaning non-git files")
+    run_git_command("no | ", ["clean", "-ffdx"])
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
 
-    print(f"Creating and checking out new branch: {branch_name}")
+    print(f"Checking out main branch: {main_branch}")
     run_git_command(["checkout", main_branch])
 
     print("\nRunning 'git remote prune origin'")
@@ -96,6 +140,9 @@ def branch_command(branch_name):
 
     print("\nInitializing and updating submodules")
     run_git_command(["submodule", "update", "--init", "--recursive"])
+
+    print("\nCleaning non-git files")
+    run_git_command("no | ", ["clean", "-ffdx"])
 
 def remove_duplicate_sections(file_path):
     pattern = r"\[.*\]"
@@ -246,6 +293,9 @@ def init_arg_parser():
 
     subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively")
 
+    fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
+    fetch_parser.add_argument("branch_name", help = "The name of the branch we should be fetching into")
+
     mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
@@ -287,6 +337,8 @@ def main():
     elif args.command == "mainbranch":
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
+    elif args.command == "fetch":
+        fetch_command()
     elif args.command == "branch":
         branch_command(args.name)
     elif args.command == "shortcut":
