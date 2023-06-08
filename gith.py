@@ -5,6 +5,7 @@ import configparser
 import re
 import time
 import sys
+import pyautogui
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^!short"
@@ -122,6 +123,61 @@ def set_remote_name(remote_name):
     # Write the updated config
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
+def find_sln_file(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.sln'):
+                return os.path.join(root, file)
+    return None
+
+def open_visual_studio_distributed_build():
+    build_dir = os.path.join(get_repo_path(), 'build')
+    sln_file = find_sln_file(build_dir)
+
+    if sln_file:
+        # Open the solution file in Visual Studio
+        os.startfile(sln_file)
+
+        # Wait for Visual Studio to open and the solution to load
+        time.sleep(20)
+
+        screenWidth, screenHeight = pyautogui.size()
+
+        pyautogui.moveTo(screenWidth*0.5, screenHeight*.9)
+
+        # Send keyboard shortcuts to select release configuration
+        pyautogui.hotkey('alt')
+        time.sleep(1)
+        pyautogui.hotkey('b')
+        time.sleep(1)
+        pyautogui.press("up")
+        time.sleep(1)
+        pyautogui.press("enter")
+        time.sleep(1)
+        pyautogui.press("down")
+        time.sleep(1)
+        pyautogui.press("down")
+        time.sleep(1)
+        pyautogui.press("enter")
+        time.sleep(1)
+
+        # Senc keyboard shortcuts to start distributed build
+        pyautogui.hotkey('alt')
+        time.sleep(1)
+        pyautogui.hotkey('b')
+        time.sleep(1)
+        pyautogui.press("down")
+        time.sleep(1)
+        pyautogui.press("down")
+        time.sleep(1)
+        pyautogui.press("down")
+        time.sleep(1)
+        pyautogui.press("enter")
+        time.sleep(1)
+
+        print("Visual Studio build opened and distributed build configuration selected.")
+    else:
+        print("Error: No .sln file found in the build directory.")
 
 def run_command(command, timeout=30, max_retries=5):
     retries = 0
@@ -549,6 +605,8 @@ def init_arg_parser():
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
+    subparsers.add_parser("build", help="Build VS solution in current repo for Release and Distributed")
+
     return parser
 
 def main():
@@ -592,6 +650,8 @@ def main():
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
+    elif args.command == "debug":
+        open_visual_studio_distributed_build()
     else:
         parser.print_help()
 
