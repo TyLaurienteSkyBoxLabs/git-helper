@@ -106,10 +106,10 @@ def run_command(command, timeout=30, max_retries=5):
                 sys.stdout.write(out.decode())
                 sys.stdout.flush()
 
-        if time.time() - start_time >= timeout:
+        if time.time() - start_time >= timeout and retries < max_retries:
             retries += 1
             print(f"Command timed out. (Attempt {retries}) Retrying...")
-        else:
+        elif retries < max_retries:
             return output
             
     print(f"Command failed after {max_retries} retries.")
@@ -119,10 +119,10 @@ def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args, timeout=40):
+def run_git_command(args, timeout=40, max_retries=5):
     git_command = get_git_command(args)
     
-    output = run_command(git_command, timeout)
+    output = run_command(git_command, timeout, max_retries)
     if (output == "!*FAILURE!*"):
         return False
 
@@ -190,7 +190,7 @@ def fetch_command(rebase=False):
         return
 
     print("\nRunning 'git remote prune origin'")
-    passed = run_git_command(["remote", "prune", "origin"], 25)
+    passed = run_git_command(["remote", "prune", "origin"], 15, 1)
     if not passed:
         return
 
@@ -237,7 +237,7 @@ def branch_command(branch_name):
         return
 
     print("\nRunning 'git remote prune origin'")
-    passed = run_git_command(["remote", "prune", "origin"], 25)
+    passed = run_git_command(["remote", "prune", "origin"], 15, 1)
     if not passed:
         return
 
