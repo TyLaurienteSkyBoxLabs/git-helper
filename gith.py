@@ -349,39 +349,39 @@ def init_arg_parser():
     parser = argparse.ArgumentParser(prog="gith", description="Git Helper")
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
-    repo_parser = subparsers.add_parser("repo", aliases=["-r"], help="Set or update the repository path")
+    repo_parser = subparsers.add_parser("repo", aliases=["-r"], help="Set or update the repository path -----------------------------------")
     repo_parser.add_argument("directory", help="Path to the git repository")
 
-    status_parser = subparsers.add_parser("status", aliases=["-s"], help="Show the status of the current repository")
+    status_parser = subparsers.add_parser("status", aliases=["-s"], help="Show the status of the current profile -------------- gith status [all]  --- display all info -----------------------------------")
     status_parser.add_argument("all", nargs="?", default=None, help="Print shortcuts and all profiles")
 
-    command_parser = subparsers.add_parser("command", aliases=["-c"], help="Run a git command in the repo directory")
+    command_parser = subparsers.add_parser("command", aliases=["-c"], help="Run a git command in the repo directory -----------------------------------")
     command_parser.add_argument("git_args", nargs=argparse.REMAINDER, help="Git command and arguments")
 
-    subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively")
+    subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively -----------------------------------")
 
-    fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
+    fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files --------- gith fetch [rebase]  ---  rebase instead of merge -----------------------------------")
     fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
 
-    mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name")
+    mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name -----------------------------------")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
-    branch_parser = subparsers.add_parser("branch", aliases=["-b"], help="Create and switch to a new branch")
+    branch_parser = subparsers.add_parser("branch", aliases=["-b"], help="Create and switch to a new branch -----------------------------------")
     branch_parser.add_argument("name", help="Name of the new branch")
 
-    shortcut_parser = subparsers.add_parser("shortcut", help="Add or execute a shortcut")
+    shortcut_parser = subparsers.add_parser("shortcut", help="Add or execute a shortcut -------------------------- Specify a name and command to save, or just a name to run --------------------------------------------------------------------------------------------------------")
     shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
     shortcut_parser.add_argument("shortcut_command", nargs="?", default=None, help="Command associated with the shortcut")
 
-    addprofile_parser = subparsers.add_parser("addprofile", aliases=["-ap"], help="Add a new profile")
+    addprofile_parser = subparsers.add_parser("addprofile", aliases=["-ap"], help="Add a new profile ------------------------------------ gith addprofile [copy]  ---  copy current profile ------------------------------------------------------------")
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
     addprofile_parser.add_argument("name", help="Name of the profile")
 
-    switchprofile_parser = subparsers.add_parser("profile", aliases=["-p"], help="Switch to a different profile")
+    switchprofile_parser = subparsers.add_parser("profile", aliases=["-p"], help="Switch to a different profile ------------------------ gith profile [delete]  ---  delete profile ------------------------------------------------------")
     switchprofile_parser.add_argument("delete", nargs="?", default=False, help="Delete a profile")
     switchprofile_parser.add_argument("name", help="Name of the profile")
 
-    branchandshort_parser = subparsers.add_parser("branchandshort", aliases=["-bs"], help="Create a new branch and execute a shortcut command")
+    branchandshort_parser = subparsers.add_parser("branchandshort", aliases=["-bs"], help="Create a new branch and execute a shortcut command ------------------------------------------------------")
     branchandshort_parser.add_argument("branch_name", help="Name of the new branch")
     branchandshort_parser.add_argument("shortcut_name", help="Name of the shortcut")
 
