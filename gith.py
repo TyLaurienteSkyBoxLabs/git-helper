@@ -117,6 +117,24 @@ def get_repo_branch_name():
     
     return None
 
+def clean_non_git_files():
+    clean_command = get_git_command(["clean", "-ffdx"])
+
+    process = subprocess.Popen(clean_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, universal_newlines=True)
+
+    # Read the stdout and stderr streams line by line
+    stdout, stderr = process.communicate()
+    for line in stdout.splitlines():
+        print(line)
+        # Check if the prompt "Would you like to try again (y/n)" is present
+        if "Would you like to try again (y/n)" in line:
+            # Automatically send "n" as the response
+            process.stdin.write("n\n")
+            process.stdin.flush()
+    
+    # Wait for the process to finish
+    process.wait()
+
 def fetch_command(rebase=False):
     main_branch = get_branch_name()
     fetch_branch = get_repo_branch_name()
@@ -153,22 +171,7 @@ def fetch_command(rebase=False):
     run_git_command(["submodule", "update", "--init", "--recursive"])
 
     print("\nCleaning non-git files")
-    clean_command = get_git_command(["clean", "-ffdx"])
-
-    process = subprocess.Popen(clean_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, universal_newlines=True)
-
-    # Read the stdout and stderr streams line by line
-    stdout, stderr = process.communicate()
-    for line in stdout.splitlines():
-        print(line)
-        # Check if the prompt "Would you like to try again (y/n)" is present
-        if "Would you like to try again (y/n)" in line:
-            # Automatically send "n" as the response
-            process.stdin.write("n\n")
-            process.stdin.flush()
-    
-    # Wait for the process to finish
-    process.wait()
+    clean_non_git_files()
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
@@ -193,7 +196,7 @@ def branch_command(branch_name):
     run_git_command(["submodule", "update", "--init", "--recursive"])
 
     print("\nCleaning non-git files")
-    run_git_command("no | ", ["clean", "-ffdx"])
+    clean_non_git_files()
 
 def remove_duplicate_sections(file_path):
     pattern = r"\[.*\]"
