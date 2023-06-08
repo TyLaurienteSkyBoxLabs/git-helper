@@ -74,9 +74,16 @@ def run_git_command(args, before_args=None):
     repo_path = get_repo_path()
     git_command = ["git", "-C", repo_path] + args
     if before_args:
-        subprocess.run(before_args + git_command)
-    else:
-        subprocess.run(git_command)
+        git_command = before_args + git_command
+
+    result = subprocess.run(git_command, capture_output=True, text=True)
+
+    output = result.stdout
+    if "CONFLICT" in output:
+        return False
+
+    return True
+        
 
 def get_repo_branch_name():
     repo_path = get_repo_path()
@@ -112,6 +119,13 @@ def fetch_command():
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
     run_git_command(["checkout", "-b", fetch_branch])
+
+    print("\nRebasing branch to {main_branch}")
+    passed = run_git_command(["rebase", main_branch])
+
+    if not passed:
+        print("Could not rebase branch, there were conflicts")
+        return
 
     print("\nInitializing and updating submodules")
     run_git_command(["submodule", "update", "--init", "--recursive"])
@@ -293,8 +307,7 @@ def init_arg_parser():
 
     subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively")
 
-    fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
-    fetch_parser.add_argument("branch_name", help = "The name of the branch we should be fetching into")
+    subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files")
 
     mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
