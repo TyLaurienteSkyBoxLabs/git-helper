@@ -88,14 +88,28 @@ def set_branch_name(branch_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def run_command(command, timeout):
-    max_retries = 5
+def run_command(command, timeout=30, max_retries=5):
     retries = 0
 
     while retries < max_retries:
         try:
-            completed_process = subprocess.run(command, timeout=timeout, capture_output=True, text=True)
-            return completed_process
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                output = process.stdout.readline()
+                if output:
+                    print(output.strip())
+                else:
+                    break
+
+            process.terminate()
+            process.wait(timeout=1)  # Wait for the process to clean up
+
+            if process.returncode == 0:
+                return process.returncode
+            else:
+                print(f"All {retries} failed. Aborting execution")
+                return "!*FAILURE!*"
         except subprocess.TimeoutExpired:
             retries += 1
             print(f"Command timed out. (Attempt {retries}) Retrying...")
@@ -111,6 +125,9 @@ def run_git_command(args, timeout=40):
     git_command = get_git_command(args)
     
     result = run_command(git_command, timeout)
+    if (result == "!*FAILURE!*"):
+        return False
+
     output = result.stdout
 
     print(output)
@@ -156,24 +173,32 @@ def clean_non_git_files():
 def fetch_command(rebase=False):
     main_branch = get_branch_name()
     fetch_branch = get_repo_branch_name()
+    passed = False
 
     print(f"Checking out main branch: {main_branch}")
-    run_git_command(["checkout", main_branch], 15)
+    passed = run_git_command(["checkout", main_branch], 15)
+    if not passed:
+        return
 
     print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"], 25)
+    passed = run_git_command(["remote", "prune", "origin"], 25)
+    if not passed:
+        return
 
     print(f"\nFetching latest changes for branch: {main_branch}")
     run_git_command(["fetch", "origin", main_branch], 20)
-    run_git_command(["fetch", "origin", main_branch], 20)
+    passed = run_git_command(["fetch", "origin", main_branch], 20)
+    if not passed:
+        return
 
     print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
+    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
+    if not passed:
+        return
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
-    run_git_command(["checkout", fetch_branch], 15)
+    passed = run_git_command(["checkout", fetch_branch], 15)
 
-    passed = False
     if rebase:
         print(f"\nRebasing branch to {main_branch}")
         passed = run_git_command(["rebase", main_branch], 25)
@@ -186,32 +211,47 @@ def fetch_command(rebase=False):
         return
 
     print("\nInitializing and updating submodules")
-    run_git_command(["submodule", "update", "--init", "--recursive"])
+    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+    if not passed:
+        return
 
     print("\nCleaning non-git files")
     clean_non_git_files()
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
+    passed = False
 
     print(f"Checking out main branch: {main_branch}")
-    run_git_command(["checkout", main_branch])
+    passed = run_git_command(["checkout", main_branch], 15)
+    if not passed:
+        return
 
     print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"])
+    passed = run_git_command(["remote", "prune", "origin"], 25)
+    if not passed:
+        return
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", "origin", main_branch])
-    run_git_command(["fetch", "origin", main_branch])
+    run_git_command(["fetch", "origin", main_branch], 20)
+    passed = run_git_command(["fetch", "origin", main_branch], 20)
+    if not passed:
+        return
 
     print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    run_git_command(["reset", "--hard", f"origin/{main_branch}"])
+    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
+    if not passed:
+        return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
-    run_git_command(["checkout", "-b", branch_name])
+    passed = run_git_command(["checkout", "-b", branch_name], 15)
+    if not passed:
+        return
 
     print("\nInitializing and updating submodules")
-    run_git_command(["submodule", "update", "--init", "--recursive"])
+    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+    if not passed:
+        return
 
     print("\nCleaning non-git files")
     clean_non_git_files()
