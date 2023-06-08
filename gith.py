@@ -247,7 +247,6 @@ def add_profile(profile_name, copy=False):
             options = config.options(current_profile)
             for option in options:
                 if option.find("current_profile") == -1:
-                    print(option)
                     value = config.get(current_profile, option)
                     config.set(profile_name, option, value)
 
