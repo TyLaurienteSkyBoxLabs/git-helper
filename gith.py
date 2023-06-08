@@ -4,6 +4,7 @@ import subprocess
 import configparser
 import re
 import time
+import sys
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 
@@ -90,35 +91,29 @@ def set_branch_name(branch_name):
 
 def run_command(command, timeout=30, max_retries=5):
     retries = 0
-    entireOutput = ""
 
     while retries < max_retries:
-        try:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            start_time = time.time()
-            while time.time() - start_time < timeout:
-                output = process.stdout.readline()
-                entireOutput += output
+        output = ""
+        process = subprocess.Popen(command, stderr=subprocess.PIPE)
+        start_time = time.time()
 
-                if output:
-                    print(output.strip())
-                else:
-                    break
+        while time.time() - start_time < timeout and process.poll() is None:
+            out = process.stderr.read(1)
+            if out == '' and process.poll() != None:
+                break
+            if out != '':
+                output += out.decode()
+                sys.stdout.write(out.decode())
+                sys.stdout.flush()
 
-            process.terminate()
-            process.wait(timeout=1)  # Wait for the process to clean up
-
-            if process.returncode == 0:
-                return entireOutput
-            else:
-                print(f"All {retries} failed. Aborting execution")
-                return "!*FAILURE!*"
-        except subprocess.TimeoutExpired:
+        if time.time() - start_time >= timeout:
             retries += 1
             print(f"Command timed out. (Attempt {retries}) Retrying...")
-
+        else:
+            return output
+            
     print(f"Command failed after {max_retries} retries.")
-    return None
+    return "!*FAILURE!*"
 
 def get_git_command(args):
     repo_path = get_repo_path()
@@ -245,7 +240,8 @@ def branch_command(branch_name):
         return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
-    passed = run_git_command(["checkout", "-b", branch_name], 15)
+    run_git_command(["checkout", "-b", branch_name], 15)
+    passed = run_git_command(["checkout", branch_name], 15)
     if not passed:
         return
 
