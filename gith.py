@@ -129,7 +129,7 @@ def clean_non_git_files():
     for line in stdout.splitlines():
         print(line)
         # Check if the prompt "Would you like to try again (y/n)" is present
-        if "Would you like to try again (y/n)" in line:
+        if "(y/n)" in line:
             # Automatically send "n" as the response
             process.stdin.write("n\n")
             process.stdin.flush()
@@ -364,6 +364,8 @@ def init_arg_parser():
 
     subparsers.add_parser("subinit", help="Initialize and update Git submodules recursively -----------------------------------")
 
+    subparsers.add_parser("clean", help="Clean non-git files (-ffdx)  -----------------------------------")
+
     fetch_parser = subparsers.add_parser("fetch", help="Fetch latest main and clean non-git files --------- gith fetch [rebase]  ---  rebase instead of merge -----------------------------------")
     fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
 
@@ -406,6 +408,8 @@ def main():
         run_git_command(args.git_args)
     elif args.command == "subinit":
         run_git_command(["submodule", "update", "--init", "--recursive"])
+    elif args.command == "clean":
+        clean_non_git_files()
     elif args.command == "mainbranch":
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
