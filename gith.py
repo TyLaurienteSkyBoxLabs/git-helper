@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import configparser
 import re
+import time
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 
@@ -87,14 +88,29 @@ def set_branch_name(branch_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
+def run_command(command, timeout):
+    max_retries = 5
+    retries = 0
+
+    while retries < max_retries:
+        try:
+            completed_process = subprocess.run(command, timeout=timeout, capture_output=True, text=True)
+            return completed_process
+        except subprocess.TimeoutExpired:
+            retries += 1
+            print(f"Command timed out. (Attempt {retries}) Retrying...")
+
+    print(f"Command failed after {max_retries} retries.")
+    return None
+
 def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args):
+def run_git_command(args, timeout=40):
     git_command = get_git_command(args)
     
-    result = subprocess.run(git_command, capture_output=True, text=True)
+    result = run_command(git_command, timeout)
     output = result.stdout
 
     print(output)
@@ -142,28 +158,28 @@ def fetch_command(rebase=False):
     fetch_branch = get_repo_branch_name()
 
     print(f"Checking out main branch: {main_branch}")
-    run_git_command(["checkout", main_branch])
+    run_git_command(["checkout", main_branch], 15)
 
     print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"])
+    run_git_command(["remote", "prune", "origin"], 25)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", "origin", main_branch])
-    run_git_command(["fetch", "origin", main_branch])
+    run_git_command(["fetch", "origin", main_branch], 20)
+    run_git_command(["fetch", "origin", main_branch], 20)
 
     print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    run_git_command(["reset", "--hard", f"origin/{main_branch}"])
+    run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
-    run_git_command(["checkout", fetch_branch])
+    run_git_command(["checkout", fetch_branch], 15)
 
     passed = False
     if rebase:
         print(f"\nRebasing branch to {main_branch}")
-        passed = run_git_command(["rebase", main_branch])
+        passed = run_git_command(["rebase", main_branch], 25)
     else:
         print(f"\Merging {main_branch} into {fetch_branch}")
-        passed = run_git_command(["merge", main_branch])
+        passed = run_git_command(["merge", main_branch], 25)
 
     if not passed:
         print("Could not rebase branch, there were conflicts")
