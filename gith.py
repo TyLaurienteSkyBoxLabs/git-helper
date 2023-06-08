@@ -90,6 +90,7 @@ def set_branch_name(branch_name):
 
 def run_command(command, timeout=30, max_retries=5):
     retries = 0
+    entireOutput = ""
 
     while retries < max_retries:
         try:
@@ -97,6 +98,8 @@ def run_command(command, timeout=30, max_retries=5):
             start_time = time.time()
             while time.time() - start_time < timeout:
                 output = process.stdout.readline()
+                entireOutput += output
+
                 if output:
                     print(output.strip())
                 else:
@@ -106,7 +109,7 @@ def run_command(command, timeout=30, max_retries=5):
             process.wait(timeout=1)  # Wait for the process to clean up
 
             if process.returncode == 0:
-                return process.returncode
+                return entireOutput
             else:
                 print(f"All {retries} failed. Aborting execution")
                 return "!*FAILURE!*"
@@ -124,11 +127,9 @@ def get_git_command(args):
 def run_git_command(args, timeout=40):
     git_command = get_git_command(args)
     
-    result = run_command(git_command, timeout)
-    if (result == "!*FAILURE!*"):
+    output = run_command(git_command, timeout)
+    if (output == "!*FAILURE!*"):
         return False
-
-    output = result.stdout
 
     print(output)
     
