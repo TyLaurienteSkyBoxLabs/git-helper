@@ -190,9 +190,7 @@ def fetch_command(rebase=False):
         return
 
     print("\nRunning 'git remote prune origin'")
-    passed = run_git_command(["remote", "prune", "origin"], 15, 1)
-    if not passed:
-        return
+    run_git_command(["remote", "prune", "origin"], 15, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
     run_git_command(["fetch", "origin", main_branch], 20)
@@ -237,9 +235,7 @@ def branch_command(branch_name):
         return
 
     print("\nRunning 'git remote prune origin'")
-    passed = run_git_command(["remote", "prune", "origin"], 15, 1)
-    if not passed:
-        return
+    run_git_command(["remote", "prune", "origin"], 15, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
     run_git_command(["fetch", "origin", main_branch], 20)
