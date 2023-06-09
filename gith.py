@@ -156,9 +156,10 @@ def clean_submodules():
     # Clean each submodule
     for path in submodule_paths:
         submodule_dir = path.strip()
-        subprocess.run(['git', 'clean', '-ffdx'], cwd=submodule_dir)
-        subprocess.run(['git', 'restore', '--staged', '.'], cwd=submodule_dir)
-        subprocess.run(['git', 'checkout', '.'], cwd=submodule_dir)
+        if os.path.exists(submodule_dir):
+            subprocess.run(['git', 'clean', '-ffdx'], cwd=submodule_dir)
+            subprocess.run(['git', 'restore', '--staged', '.'], cwd=submodule_dir)
+            subprocess.run(['git', 'checkout', '.'], cwd=submodule_dir)
 
 def clean_non_git_files():
     clean_command = get_git_command(["clean", "-ffdx"])
