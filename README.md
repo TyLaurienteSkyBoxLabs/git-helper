@@ -20,6 +20,8 @@ The tool can
 2. Ensure install directory path does not have any spaces in it, or Git Bash usage may not work correctly
 3. Add your install directory to your `Path` environment variable. This allows the `gith` command to work globally across your shell.command to work globally across your shell.
 4. Run git config --global --add safe.directory '*'
+5. Run `python -m pip install pyautogui`
+6. Run `python -m pip install pytesseract`
 
 ### Allow gith to run globally in Git Bash
 1. Navigate to your user folder (`%USERPROFILE%`)
