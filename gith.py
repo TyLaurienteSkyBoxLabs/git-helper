@@ -6,10 +6,7 @@ import re
 from typing import IO, NoReturn
 import time
 import pyautogui
-<<<<<<< HEAD
 import pytesseract
-=======
->>>>>>> 8ca0f84 (Add ability to open and start distributed build in VS)
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^#short"
