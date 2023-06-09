@@ -92,7 +92,7 @@ def set_branch_name(branch_name):
 def run_command(command, timeout=30, max_retries=5):
     retries = 0
 
-    while retries < max_retries:
+    while retries <= max_retries:
         output = ""
         process = subprocess.Popen(command, stderr=subprocess.PIPE)
         start_time = time.time()
@@ -106,10 +106,11 @@ def run_command(command, timeout=30, max_retries=5):
                 sys.stdout.write(out.decode())
                 sys.stdout.flush()
 
-        if time.time() - start_time >= timeout and retries < max_retries:
-            retries += 1
-            print(f"Command timed out. (Attempt {retries}) Retrying...")
-        elif retries < max_retries:
+        if time.time() - start_time >= timeout:
+            if (retries + 1) < max_retries:
+                retries += 1
+                print(f"Command timed out. (Attempt {retries}) Retrying...")
+        elif retries + 1 < max_retries:
             return output
             
     print(f"Command failed after {max_retries} retries.")
@@ -119,7 +120,7 @@ def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args, timeout=40, max_retries=5):
+def run_git_command(args, timeout=80, max_retries=5):
     git_command = get_git_command(args)
     
     output = run_command(git_command, timeout, max_retries)
@@ -187,33 +188,33 @@ def fetch_command(rebase=False):
     passed = False
 
     print(f"Checking out main branch: {main_branch}")
-    passed = run_git_command(["checkout", main_branch], 15)
+    passed = run_git_command(["checkout", main_branch])
     if not passed:
         return
 
     print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"], 15, 1)
+    run_git_command(["remote", "prune", "origin"], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
     run_git_command(["fetch", "origin", main_branch], 20)
-    passed = run_git_command(["fetch", "origin", main_branch], 20)
+    passed = run_git_command(["fetch", "origin", main_branch])
     if not passed:
         return
 
     print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
+    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"])
     if not passed:
         return
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
-    passed = run_git_command(["checkout", fetch_branch], 15)
+    passed = run_git_command(["checkout", fetch_branch])
 
     if rebase:
         print(f"\nRebasing branch to {main_branch}")
-        passed = run_git_command(["rebase", main_branch], 25)
+        passed = run_git_command(["rebase", main_branch])
     else:
         print(f"\Merging {main_branch} into {fetch_branch}")
-        passed = run_git_command(["merge", main_branch], 25)
+        passed = run_git_command(["merge", main_branch])
 
     if not passed:
         print("Could not rebase branch, there were conflicts")
@@ -232,27 +233,27 @@ def branch_command(branch_name):
     passed = False
 
     print(f"Checking out main branch: {main_branch}")
-    passed = run_git_command(["checkout", main_branch], 15)
+    passed = run_git_command(["checkout", main_branch])
     if not passed:
         return
 
     print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"], 15, 1)
+    run_git_command(["remote", "prune", "origin"], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", "origin", main_branch], 20)
-    passed = run_git_command(["fetch", "origin", main_branch], 20)
+    run_git_command(["fetch", "origin", main_branch])
+    passed = run_git_command(["fetch", "origin", main_branch])
     if not passed:
         return
 
     print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"], 15)
+    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"])
     if not passed:
         return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
-    run_git_command(["checkout", "-b", branch_name], 15)
-    passed = run_git_command(["checkout", branch_name], 15)
+    run_git_command(["checkout", "-b", branch_name])
+    passed = run_git_command(["checkout", branch_name])
     if not passed:
         return
 
