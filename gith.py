@@ -6,6 +6,7 @@ import re
 from typing import IO, NoReturn
 import time
 import pyautogui
+import pytesseract
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^#short"
@@ -196,6 +197,30 @@ def find_sln_file(directory):
                 return os.path.join(root, file)
     return None
 
+def ocr_text(region):
+    # Take a screenshot of the specified region
+    screenshot = pyautogui.screenshot(region=region)
+
+    # Perform OCR on the screenshot
+    text = pytesseract.image_to_string(screenshot)
+
+    return text.strip()
+
+
+def vs_has_distributed_option(search_region):
+    # Specify the text to search for
+    target_text = "Distributed"
+    
+    # Perform OCR on the specified region
+    extracted_text = ocr_text(search_region)
+    
+    # Check if the target text is present in the extracted text
+    if target_text.lower() in extracted_text.lower():
+        return True
+    else:
+        return False
+
+
 def open_visual_studio_distributed_build():
     build_dir = os.path.join(get_repo_path(), 'build')
     sln_file = find_sln_file(build_dir)
@@ -208,6 +233,7 @@ def open_visual_studio_distributed_build():
         time.sleep(20)
 
         screenWidth, screenHeight = pyautogui.size()
+        distributedSearchRegion = (0, 0, screenWidth, screenHeight)
 
         pyautogui.moveTo(screenWidth*0.5, screenHeight*.9)
 
@@ -216,6 +242,9 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
         pyautogui.hotkey('b')
         time.sleep(1)
+
+        hasDistributedOption = vs_has_distributed_option(distributedSearchRegion)
+
         pyautogui.press("up")
         time.sleep(1)
         pyautogui.press("enter")
@@ -236,12 +265,15 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
         pyautogui.hotkey('b')
         time.sleep(1)
-        pyautogui.press("down")
-        time.sleep(1)
-        pyautogui.press("down")
-        time.sleep(1)
-        pyautogui.press("down")
-        time.sleep(1)
+
+        if hasDistributedOption:
+            pyautogui.press("down")
+            time.sleep(1)
+            pyautogui.press("down")
+            time.sleep(1)
+            pyautogui.press("down")
+            time.sleep(1)
+
         pyautogui.press("enter")
         time.sleep(1)
 
@@ -786,7 +818,7 @@ def init_arg_parser():
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
-    subparsers.add_parser("build", help="Build VS solution in current repo for Release and Distributed")
+    subparsers.add_parser("build", help="Build VS solution in current repo for Release and Distributed, if option is present")
 
     return parser
 
