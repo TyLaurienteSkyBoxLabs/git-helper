@@ -158,10 +158,14 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
         pyautogui.press("down")
         time.sleep(1)
-        pyautogui.press("enter")
+        pyautogui.press("escape")
+        time.sleep(1)
+        pyautogui.press("escape")
+        time.sleep(1)
+        pyautogui.press("escape")
         time.sleep(1)
 
-        # Senc keyboard shortcuts to start distributed build
+        # Send keyboard shortcuts to start distributed build
         pyautogui.hotkey('alt')
         time.sleep(1)
         pyautogui.hotkey('b')
