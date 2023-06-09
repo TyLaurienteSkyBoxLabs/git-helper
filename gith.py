@@ -110,8 +110,11 @@ def run_command(command, timeout=30, max_retries=5):
             if (retries + 1) < max_retries:
                 retries += 1
                 print(f"Command timed out. (Attempt {retries}) Retrying...")
-        elif retries + 1 < max_retries:
-            return output
+                continue
+            else:
+                break
+        
+        return output
             
     print(f"Command failed after {max_retries} retries.")
     return "!*FAILURE!*"
