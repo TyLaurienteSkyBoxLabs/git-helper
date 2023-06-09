@@ -50,3 +50,12 @@ The tool can
   * If you would like to delete a profile, you can add the `delete` command before the name. Ex: `gith profile delete testProfileName`
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
+
+
+## Chaining shortcuts
+* You can chain shortcuts together by calling `gith` multiple times within a shortcut. 
+* To do this use the `&&` operator.
+* An example of this would be to create a shortcut for building a project solution, lets call this shortcut `build-solution`.
+* Now what if you would like to fetch latest main and build the solution in one command.
+* You can accomplish this by creating another shortcut called `fetch-build-solution`. This can be accomplished using the following command `gith shortcut fetch-build-solution "gith fetch && gith shortcut build-solution`.
+* Now that this shortcut is saved, to run both a fetch and a build-solution, simply run `gith shortcut fetch-build-solution` and it will run both commands.
