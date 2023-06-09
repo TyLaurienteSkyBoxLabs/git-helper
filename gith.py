@@ -156,13 +156,12 @@ def vs_has_distributed_option(search_region):
     
 def wait_for_vs_load(search_region):
     # Specify the text to search for
-    build_text = "Build"
-    debug_text = "Debug"
+    debugger_redy_text = "Local Windows Debugger"
     extracted_text = ""
-    timeout_time = 70
+    timeout_time = 40
     start_time = time.time()
     
-    while (not build_text in extracted_text) or (not debug_text in extracted_text):
+    while not debugger_redy_text in extracted_text:
         if time.time() - start_time > timeout_time:
             return False
         extracted_text = ocr_text(search_region)
@@ -183,7 +182,7 @@ def open_visual_studio_distributed_build():
 
         # Wait for Visual Studio to open and the solution to load
         wait_for_vs_load(vsSearchRegion)
-        time.sleep(3)
+        time.sleep(1)
 
         pyautogui.moveTo(screenWidth*0.5, screenHeight*.9)
 
