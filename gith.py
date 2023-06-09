@@ -123,14 +123,15 @@ def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args, timeout=80, max_retries=5):
+def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
     git_command = get_git_command(args)
     
     output = run_command(git_command, timeout, max_retries)
     if (output == "!*FAILURE!*"):
         return False
 
-    print(output)
+    if printOutput:
+        print(output)
     
     if "CONFLICT" in output:
         return False
@@ -255,8 +256,8 @@ def branch_command(branch_name):
         return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
-    run_git_command(["checkout", "-b", branch_name])
-    passed = run_git_command(["checkout", branch_name])
+    run_git_command(["branch", "-D", branch_name], 20, 1, False)
+    passed = run_git_command(["checkout", "-b", branch_name])
     if not passed:
         return
 
