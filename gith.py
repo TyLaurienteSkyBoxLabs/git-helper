@@ -833,7 +833,7 @@ def main():
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
-    elif args.command == "debug":
+    elif args.command == "build":
         open_visual_studio_distributed_build()
     elif unknown_args:
         unknown_command = unknown_args[0]
