@@ -80,6 +80,11 @@ gith() {
   * If you would like to delete a profile, you can add the `delete` command before the name. Ex: `gith profile delete testProfileName`
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
+* `gith build`
+  * This command will open the first Visual Studio with the first .sln file found in the build folder located inside the repo of your current profile. 
+  * Then it will navigate to the configuration manager, and select Release configuration.
+  * Finally, it will select distributed solution build.
+  * This means this command can be paried with others so that no input is needed from the time of branching to building.
 
 ### Shortcut macros
 * Shortcut macros allow for certain characters to be interpreted by `gith` to insert certain values.
