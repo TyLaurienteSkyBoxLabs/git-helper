@@ -380,9 +380,6 @@ def shortcut_command(shortcut_name, shortcut_command=None):
         add_shortcut(shortcut_name, shortcut_command)
     else:
         execute_shortcut(shortcut_name)
-
-def branchandshort_command(branch_name, shortcut_name):
-    branch_command(branch_name)
     
 def print_status(all=None):
     repo_path = get_repo_path()
@@ -451,10 +448,6 @@ def init_arg_parser():
     switchprofile_parser.add_argument("delete", nargs="?", default=False, help="Delete a profile")
     switchprofile_parser.add_argument("name", help="Name of the profile")
 
-    branchandshort_parser = subparsers.add_parser("branchandshort", aliases=["-bs"], help="Create a new branch and execute a shortcut command ------------------------------------------------------")
-    branchandshort_parser.add_argument("branch_name", help="Name of the new branch")
-    branchandshort_parser.add_argument("shortcut_name", help="Name of the shortcut")
-
     subparsers.add_parser("explorer", help="Open a file explorer in the repo directory")
 
     return parser
@@ -487,8 +480,6 @@ def main():
         add_profile(args.name, args.copy)
     elif args.command == "profile":
         switch_profile(args.name, args.delete)
-    elif args.command == "branchandshort":
-        branchandshort_command(args.branch_name, args.shortcut_name)
     elif args.command == "explorer":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
