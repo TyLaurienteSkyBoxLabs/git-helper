@@ -153,6 +153,21 @@ def vs_has_distributed_option(search_region):
         return True
     else:
         return False
+    
+def wait_for_vs_load(search_region):
+    # Specify the text to search for
+    build_text = "Build"
+    debug_text = "Debug"
+    extracted_text = ""
+    timeout_time = 70
+    start_time = time.time()
+    
+    while (not build_text in extracted_text) or (not debug_text in extracted_text):
+        if time.time() - start_time > timeout_time:
+            return False
+        extracted_text = ocr_text(search_region)
+
+    return True
 
 
 def open_visual_studio_distributed_build():
@@ -163,11 +178,12 @@ def open_visual_studio_distributed_build():
         # Open the solution file in Visual Studio
         os.startfile(sln_file)
 
-        # Wait for Visual Studio to open and the solution to load
-        time.sleep(20)
-
         screenWidth, screenHeight = pyautogui.size()
-        distributedSearchRegion = (0, 0, screenWidth, screenHeight)
+        vsSearchRegion = (0, 0, screenWidth, screenHeight)
+
+        # Wait for Visual Studio to open and the solution to load
+        wait_for_vs_load(vsSearchRegion)
+        time.sleep(3)
 
         pyautogui.moveTo(screenWidth*0.5, screenHeight*.9)
 
@@ -177,7 +193,7 @@ def open_visual_studio_distributed_build():
         pyautogui.hotkey('b')
         time.sleep(1)
 
-        hasDistributedOption = vs_has_distributed_option(distributedSearchRegion)
+        hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
 
         pyautogui.press("up")
         time.sleep(1)
