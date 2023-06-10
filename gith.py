@@ -124,6 +124,7 @@ def set_remote_name(remote_name):
     # Write the updated config
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
+
 def find_sln_file(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
