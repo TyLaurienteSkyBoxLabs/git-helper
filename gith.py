@@ -8,6 +8,12 @@ import sys
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 
+def clean_path(path):
+    path = path.replace('"', '')
+    path = path.replace("'", '')
+
+    return path
+
 def get_current_profile():
     config = read_gith_config()
     if config.has_option("default", "current_profile"):
@@ -42,7 +48,7 @@ def get_repo_path():
     current_profile = get_current_profile()
 
     if config.has_option(current_profile, "repo_path"):
-        return config.get(current_profile, "repo_path")
+        return clean_path(config.get(current_profile, "repo_path"))
 
     return None
 
@@ -57,6 +63,7 @@ def set_repo_path(repo_path):
     if config.has_option(current_profile, "repo_path"):
         config.remove_option(current_profile, "repo_path")
 
+    repo_path = clean_path(repo_path)
     config.set(current_profile, "repo_path", str(repo_path))
 
     # Write the updated config
@@ -223,7 +230,7 @@ def fetch_command(rebase=False):
     if not passed:
         return
 
-    print("\nRunning 'git remote prune {remote_name}'")
+    print(f"\nRunning 'git remote prune {remote_name}'")
     run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
@@ -244,7 +251,7 @@ def fetch_command(rebase=False):
         print(f"\nRebasing branch to {main_branch}")
         passed = run_git_command(["rebase", main_branch])
     else:
-        print(f"\Merging {main_branch} into {fetch_branch}")
+        print(f"\nMerging {main_branch} into {fetch_branch}")
         passed = run_git_command(["merge", main_branch])
 
     if not passed:
@@ -269,7 +276,7 @@ def branch_command(branch_name):
     if not passed:
         return
 
-    print("\nRunning 'git remote prune {remote_name}'")
+    print(f"\nRunning 'git remote prune {remote_name}'")
     run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
