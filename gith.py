@@ -89,6 +89,32 @@ def set_branch_name(branch_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
+def get_remote_name():
+    config = read_gith_config()
+    current_profile = get_current_profile()
+
+    if config.has_option(current_profile, "remote_name"):
+        return config.get(current_profile, "remote_name")
+
+    return "origin"
+
+def set_remote_name(remote_name):
+    config = read_gith_config()
+    current_profile = get_current_profile()
+
+    if not config.has_section(current_profile):
+        config.add_section(current_profile)
+
+    # Remove existing branch_name line if present
+    if config.has_option(current_profile, "remote_name"):
+        config.remove_option(current_profile, "remote_name")
+
+    config.set(current_profile, "remote_name", str(remote_name))
+
+    # Write the updated config
+    with open(GITH_CONFIG_FILE, "w") as config_file:
+        config.write(config_file)
+
 def run_command(command, timeout=30, max_retries=5):
     retries = 0
 
@@ -189,6 +215,7 @@ def clean_non_git_files():
 def fetch_command(rebase=False):
     main_branch = get_branch_name()
     fetch_branch = get_repo_branch_name()
+    remote_name = get_remote_name()
     passed = False
 
     print(f"Checking out main branch: {main_branch}")
@@ -196,17 +223,17 @@ def fetch_command(rebase=False):
     if not passed:
         return
 
-    print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"], 35, 1)
+    print("\nRunning 'git remote prune {remote_name}'")
+    run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", "origin", main_branch], 20)
-    passed = run_git_command(["fetch", "origin", main_branch])
+    run_git_command(["fetch", remote_name, main_branch], 20)
+    passed = run_git_command(["fetch", remote_name, main_branch])
     if not passed:
         return
 
-    print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"])
+    print(f"\nResetting branch: {main_branch} to {remote_name}/{main_branch}")
+    passed = run_git_command(["reset", "--hard", f"{remote_name}/{main_branch}"])
     if not passed:
         return
 
@@ -234,6 +261,7 @@ def fetch_command(rebase=False):
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
+    remote_name = get_remote_name()
     passed = False
 
     print(f"Checking out main branch: {main_branch}")
@@ -241,17 +269,17 @@ def branch_command(branch_name):
     if not passed:
         return
 
-    print("\nRunning 'git remote prune origin'")
-    run_git_command(["remote", "prune", "origin"], 35, 1)
+    print("\nRunning 'git remote prune {remote_name}'")
+    run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", "origin", main_branch])
-    passed = run_git_command(["fetch", "origin", main_branch])
+    run_git_command(["fetch", remote_name, main_branch])
+    passed = run_git_command(["fetch", remote_name, main_branch])
     if not passed:
         return
 
-    print(f"\nResetting branch: {main_branch} to origin/{main_branch}")
-    passed = run_git_command(["reset", "--hard", f"origin/{main_branch}"])
+    print(f"\nResetting branch: {main_branch} to {remote_name}/{main_branch}")
+    passed = run_git_command(["reset", "--hard", f"{remote_name}/{main_branch}"])
     if not passed:
         return
 
@@ -390,13 +418,15 @@ def print_status(all=None):
     repo_path = get_repo_path()
     branch_name = get_branch_name()
     current_profile = get_current_profile()
+    remote_name = get_remote_name()
 
     if not repo_path:
         repo_path = "Not set"
 
     print(f"Current Profile: {current_profile}")
-    print(f"Current repository: {repo_path}")
+    print(f"Current Repository: {repo_path}")
     print(f"Main Branch: {branch_name}")
+    print(f"Remote Name: {remote_name}")
 
     if (all == None):
         return
@@ -438,6 +468,9 @@ def init_arg_parser():
     mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["-m"], help="Set the main branch name -----------------------------------")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
+    remotename_parser = subparsers.add_parser("remote", help="Switch to using a different remote (origin by default) -----------------------------------")
+    remotename_parser.add_argument("remotename", help="Name of the remote")
+
     branch_parser = subparsers.add_parser("branch", aliases=["-b"], help="Create and switch to a new branch -----------------------------------")
     branch_parser.add_argument("name", help="Name of the new branch")
 
@@ -475,6 +508,9 @@ def main():
     elif args.command == "mainbranch":
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
+    elif args.command == "remote":
+        set_remote_name(args.remotename)
+        print(f"Remote set to: {args.remotename}")
     elif args.command == "fetch":
         fetch_command(args.rebase)
     elif args.command == "branch":

@@ -33,6 +33,8 @@ The tool can
   * By default, merge is used so as to not be destructive to history, run `git fetch rebase` to rebase instead.
 * `gith mainbranch $branch_name`
   * This command allows specifying a different "main" branch name, for projects that don't use "main" as their main branch. This will be used as the base branch for fetching and branching.
+* `gith remote $remote_name`
+  * This command allows specifying a different "origin" remote name, for projects that use multiple remotes. This will be used as the base branch for fetching and branching.
 * `gith branch $branch_name`
   * This command will do all of the same steps as fetch, but instead of using the previously checked out branch, it will create a new one off of main using the name specified.
 * `gith shortcut $shortcut_name [$shortcut_command]`
