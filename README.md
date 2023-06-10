@@ -13,6 +13,18 @@ The tool can
 2. Run `setx path "%PATH%;C:\path\to\directory\"` (ONLY IN COMMAND PROMPT, other shells can break path) to add the path of the program to your main Path environment variable. This allows the `gith` command to work globally across your shell.
 3. Run git config --global --add safe.directory '*'
 
+### Allow gith to run globally in Git Bash
+1. Navigate to your user folder (`%USERPROFILE%`)
+2. Create or open `.bash_profile`
+3. Add the below command into the file, subsituting `path/to/git-helper/` for the actual path to git-helper
+4. Save and re-launch git bash, you should now be able to run gith globablly, without the need for specifying.bat
+
+```
+gith() {
+    "path/to/git-helper/gith.bat" "$@"
+}
+```
+
 
 ### Usage:
 [ ] *indicates optional parameter*
