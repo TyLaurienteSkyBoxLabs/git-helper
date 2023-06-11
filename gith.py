@@ -276,6 +276,21 @@ def fetch_command(rebase=False):
     print("\nCleaning non-git files")
     clean_non_git_files()
 
+def fetch_branch_command(fetch_branch):
+    remote_name = get_remote_name()
+    
+    print(f"Fetching fetch branch: {fetch_branch}")
+    run_git_command(["fetch", remote_name, fetch_branch], 20)
+    passed = run_git_command(["fetch", remote_name, fetch_branch])
+    if not passed:
+        return
+    
+    print(f"Checking out fetch branch: {fetch_branch}")
+    run_git_command(["checkout", fetch_branch])
+
+    print(f"Resetting fetch branch to remote fetch branch {fetch_branch}")
+    run_git_command(["reset", "--hard", f"{remote_name}/{fetch_branch}"])
+
 def branch_command(branch_name):
     main_branch = get_branch_name()
     remote_name = get_remote_name()
@@ -475,7 +490,7 @@ def init_arg_parser():
     command_parser = subparsers.add_parser("command", aliases=["c"], help="Run a git command in the repo directory")
     command_parser.add_argument("git_args", nargs=argparse.REMAINDER, help="Git command and arguments")
 
-    subparsers.add_parser("subinit", aliases=["su"], help="Initialize and update Git submodules recursively")
+    subparsers.add_parser("sub-init", aliases=["su"], help="Initialize and update Git submodules recursively")
 
     subparsers.add_parser("clean", aliases=["cl"], help="Clean non-git files (-ffdx)")
 
@@ -488,7 +503,10 @@ def init_arg_parser():
     fetch_parser = subparsers.add_parser("fetch", aliases=["f"], help="Fetch latest main and clean non-git files ---- gith fetch [rebase]  ----  rebase instead of merge")
     fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
 
-    mainbranch_parser = subparsers.add_parser("mainbranch", aliases=["mb"], help="Set the main branch name")
+    fetch_branch_parser = subparsers.add_parser("fetch-branch", aliases=["fb"], help="Fetch remote branch and checkout that branch, also clean non-git files")
+    fetch_branch_parser.add_argument("branch", help="Name of remote branch")
+
+    mainbranch_parser = subparsers.add_parser("main-branch", aliases=["mb"], help="Set the main branch name")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
     remotename_parser = subparsers.add_parser("remote", aliases=["r"], help="Switch to using a different remote (origin by default)")
@@ -501,7 +519,7 @@ def init_arg_parser():
     shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
     shortcut_parser.add_argument("shortcut_command", nargs="?", default=None, help="Command associated with the shortcut")
 
-    addprofile_parser = subparsers.add_parser("addprofile", aliases=["ap"], help="Add a new profile ---- gith addprofile [copy]  ----  copy current profile")
+    addprofile_parser = subparsers.add_parser("add-profile", aliases=["ap"], help="Add a new profile ---- gith addprofile [copy]  ----  copy current profile")
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
     addprofile_parser.add_argument("name", help="Name of the profile")
 
@@ -524,11 +542,11 @@ def main():
         print_status(args.all)
     elif args.command == "command" or args.command == "c":
         run_git_command(args.git_args)
-    elif args.command == "subinit" or args.command == "su":
+    elif args.command == "sub-init" or args.command == "su":
         run_git_command(["submodule", "update", "--init", "--recursive"])
     elif args.command == "clean" or args.command == "cl":
         clean_non_git_files()
-    elif args.command == "mainbranch" or args.command == "mb":
+    elif args.command == "main-branch" or args.command == "mb":
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
     elif args.command == "remote" or args.command == "r":
@@ -540,11 +558,13 @@ def main():
         push_command(args.force)
     elif args.command == "fetch" or args.command == "f":
         fetch_command(args.rebase)
+    elif args.command == "fetch-branch" or args.command == "fb":
+        fetch_branch_command(args.branch)
     elif args.command == "branch" or args.command == "b":
         branch_command(args.name)
     elif args.command == "shortcut" or args.command == "sc":
         shortcut_command(args.shortcut_name, args.shortcut_command)
-    elif args.command == "addprofile" or args.command == "ap":
+    elif args.command == "add-profile" or args.command == "ap":
         add_profile(args.name, args.copy)
     elif args.command == "profile" or args.command == "pr":
         switch_profile(args.name, args.delete)

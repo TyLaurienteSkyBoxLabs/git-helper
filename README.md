@@ -56,6 +56,8 @@ gith() {
   * This command will do a number of steps to pull latest main into your current checked out branch.
   * This includes: checking out the main branch, fetching changes from remote, resseting local main to remote changes, checking out the previous branch that was checked out, and merging main into that branch.
   * By default, merge is used so as to not be destructive to history, run `git fetch rebase` to rebase instead.
+* `gith fetch $branch_name`
+  * This command will fetch a remote branch, checkout to the fetch branch and reset the local branch to the remote branch
 * `gith mainbranch $branch_name`
   * This command allows specifying a different "main" branch name, for projects that don't use "main" as their main branch. This will be used as the base branch for fetching and branching.
 * `gith remote $remote_name`
