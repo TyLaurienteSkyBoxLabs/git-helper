@@ -291,6 +291,9 @@ def fetch_branch_command(fetch_branch):
     print(f"Resetting fetch branch to remote fetch branch {fetch_branch}")
     run_git_command(["reset", "--hard", f"{remote_name}/{fetch_branch}"])
 
+    print("Updating submodules with `git submodule update --init --recursive")
+    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+
 def branch_command(branch_name):
     main_branch = get_branch_name()
     remote_name = get_remote_name()
