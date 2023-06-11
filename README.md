@@ -9,7 +9,7 @@ The tool can
 
 ### *Currently only supporting windows*
 
-1. To get started, download and extract both the gith.py and gith.bat files to your install directory of choice.
+1. To get started, download and extract both the gith.py and gith.bat files to your install directory of choice. (Ensure install directory path does not have any spaces in it, or Git Bash usage may not work correctly)
 2. Run `setx path "%PATH%;C:\path\to\directory\"` (ONLY IN COMMAND PROMPT, other shells can break path) to add the path of the program to your main Path environment variable. This allows the `gith` command to work globally across your shell.
 3. Run git config --global --add safe.directory '*'
 
@@ -39,6 +39,11 @@ gith() {
   * This command will update your submodules by running `git submodule update --init --recursive`
 * `gith clean`
   * This command will clean all non-git files in your repo using `git clean -ffdx`. This includes navigating to all sub-modules and running `git clean -ffdx` as well.
+* `git commit $commit_message`
+  * This command will add all untracked changes using `git add .` and then proceed to commit the changes by running `git commit -m"$commit_message"`
+* `git push [force]`
+  * This command will push changes to the remote that is has been specified by the `gith remote` command (origin by default).
+  * You can run `git push force` to perform a force push.
 * `gith fetch [rebase]`
   * This command will do a number of steps to pull latest main into your current checked out branch.
   * This includes: checking out the main branch, fetching changes from remote, resseting local main to remote changes, checking out the previous branch that was checked out, and merging main into that branch.

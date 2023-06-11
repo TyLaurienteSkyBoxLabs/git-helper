@@ -171,7 +171,7 @@ def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
 
     return True
 
-def get_repo_branch_name():
+def get_current_branch_name():
     repo_path = get_repo_path()
     if not repo_path:
         return None
@@ -219,9 +219,22 @@ def clean_non_git_files():
 
     clean_submodules()
 
+def commit_command(message):
+    run_git_command(["add", "."])
+    run_git_command(["commit", "-m", clean_path(message)])
+
+def push_command(force):
+    remote_name = get_remote_name()
+    branch_name = get_current_branch_name()
+
+    if force:
+        run_git_command(["push", remote_name, branch_name, "-f"])
+    else:
+        run_git_command(["push", remote_name, branch_name])
+
 def fetch_command(rebase=False):
     main_branch = get_branch_name()
-    fetch_branch = get_repo_branch_name()
+    fetch_branch = get_current_branch_name()
     remote_name = get_remote_name()
     passed = False
 
@@ -469,6 +482,12 @@ def init_arg_parser():
 
     subparsers.add_parser("clean", aliases=["cl"], help="Clean non-git files (-ffdx)")
 
+    commit_parser = subparsers.add_parser("commit", aliases=["co"], help="Method which takes a commit message, adds untracked changes and commits ---- gith commit $commit_message")
+    commit_parser.add_argument("message", help="Commit message")
+
+    push_parser = subparsers.add_parser("push", aliases=["p"], help="Command to push to main branch ---- gith push [force] ---- force push")
+    push_parser.add_argument("force", nargs="?", default=False, help="Force push")
+
     fetch_parser = subparsers.add_parser("fetch", aliases=["f"], help="Fetch latest main and clean non-git files ---- gith fetch [rebase]  ----  rebase instead of merge")
     fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
 
@@ -489,7 +508,7 @@ def init_arg_parser():
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
     addprofile_parser.add_argument("name", help="Name of the profile")
 
-    switchprofile_parser = subparsers.add_parser("profile", aliases=["p"], help="Switch to a different profile ---- gith profile [delete]  ----  delete profile")
+    switchprofile_parser = subparsers.add_parser("profile", aliases=["pr"], help="Switch to a different profile ---- gith profile [delete]  ----  delete profile")
     switchprofile_parser.add_argument("delete", nargs="?", default=False, help="Delete a profile")
     switchprofile_parser.add_argument("name", help="Name of the profile")
 
@@ -518,6 +537,10 @@ def main():
     elif args.command == "remote" or args.command == "r":
         set_remote_name(args.remotename)
         print(f"Remote set to: {args.remotename}")
+    elif args.command == "commit" or args.command == "co":
+        commit_command(args.message)
+    elif args.command == "push" or args.command == "p":
+        push_command(args.force)
     elif args.command == "fetch" or args.command == "f":
         fetch_command(args.rebase)
     elif args.command == "branch" or args.command == "b":
@@ -526,7 +549,7 @@ def main():
         shortcut_command(args.shortcut_name, args.shortcut_command)
     elif args.command == "addprofile" or args.command == "ap":
         add_profile(args.name, args.copy)
-    elif args.command == "profile" or args.command == "p":
+    elif args.command == "profile" or args.command == "pr":
         switch_profile(args.name, args.delete)
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
