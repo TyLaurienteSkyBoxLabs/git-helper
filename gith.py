@@ -162,9 +162,6 @@ def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
     output = run_command(git_command, timeout, max_retries)
     if (output == "!*FAILURE!*"):
         return False
-
-    if printOutput:
-        print(output)
     
     if "CONFLICT" in output:
         return False
