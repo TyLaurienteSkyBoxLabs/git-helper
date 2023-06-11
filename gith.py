@@ -509,7 +509,7 @@ def init_arg_parser():
     mainbranch_parser = subparsers.add_parser("main-branch", aliases=["mb"], help="Set the main branch name")
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
-    remotename_parser = subparsers.add_parser("remote", aliases=["r"], help="Switch to using a different remote (origin by default)")
+    remotename_parser = subparsers.add_parser("remote", aliases=["re"], help="Switch to using a different remote (origin by default)")
     remotename_parser.add_argument("remotename", help="Name of the remote")
 
     branch_parser = subparsers.add_parser("branch", aliases=["b"], help="Create and switch to a new branch")
@@ -549,7 +549,7 @@ def main():
     elif args.command == "main-branch" or args.command == "mb":
         set_branch_name(args.branch)
         print(f"Main branch set to: {args.branch}")
-    elif args.command == "remote" or args.command == "r":
+    elif args.command == "remote" or args.command == "re":
         set_remote_name(args.remotename)
         print(f"Remote set to: {args.remotename}")
     elif args.command == "commit" or args.command == "co":
