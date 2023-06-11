@@ -29,7 +29,7 @@ The tool can
 
 ```
 gith() {
-    "path/to/git-helper/gith.bat" "$@"
+    path/to/git-helper/gith.bat "${@:1}"
 }
 ```
 
