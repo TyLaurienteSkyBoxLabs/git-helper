@@ -139,6 +139,12 @@ def run_command(command, timeout=30, max_retries=5):
                 sys.stdout.write(out.decode())
                 sys.stdout.flush()
 
+        out = process.stderr.read(1)
+        if (out != ''):
+            output += out.decode()
+            sys.stdout.write(out.decode())
+            sys.stdout.flush()
+
         if time.time() - start_time >= timeout:
             if (retries + 1) < max_retries:
                 retries += 1
