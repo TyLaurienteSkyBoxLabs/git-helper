@@ -270,6 +270,7 @@ def fetch_command(rebase=False):
         return
 
     print("\nInitializing and updating submodules")
+    run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
     if not passed:
         return
@@ -293,6 +294,7 @@ def fetch_branch_command(fetch_branch):
     run_git_command(["reset", "--hard", f"{remote_name}/{fetch_branch}"])
 
     print("\nUpdating submodules with `git submodule update --init --recursive")
+    run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
 
 def branch_command(branch_name):
@@ -326,6 +328,7 @@ def branch_command(branch_name):
         return
 
     print("\nInitializing and updating submodules")
+    run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
     if not passed:
         return
@@ -547,6 +550,7 @@ def main():
     elif args.command == "command" or args.command == "c":
         run_git_command(args.git_args)
     elif args.command == "sub-init" or args.command == "su":
+        run_git_command(["submodule", "update", "--init", "--recursive"])
         run_git_command(["submodule", "update", "--init", "--recursive"])
     elif args.command == "clean" or args.command == "cl":
         clean_non_git_files()
