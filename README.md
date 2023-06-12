@@ -81,10 +81,16 @@ gith() {
   * This command will open a file explorer in the directory of your current profiles repo.
 
 
-## Chaining shortcuts
+### Chaining shortcuts
 * You can chain shortcuts together by calling `gith` multiple times within a shortcut. 
-* To do this use the `&&` operator.
+* To do this in command prompt, use the `&&` operator
+* To do this in powershell, use the `;` operator
+* For chaining commands within a shortcut, you have to use the `&&` operator since `gith` uses cmd as its underlying shell
 * An example of this would be to create a shortcut for building a project solution, lets call this shortcut `build-solution`.
 * Now what if you would like to fetch latest main and build the solution in one command.
 * You can accomplish this by creating another shortcut called `fetch-build-solution`. This can be accomplished using the following command `gith shortcut fetch-build-solution "gith fetch && gith shortcut build-solution`.
 * Now that this shortcut is saved, to run both a fetch and a build-solution, simply run `gith shortcut fetch-build-solution` and it will run both commands.
+
+### Non-shortcut chaining
+* You can also simply chain commands without creating shortcuts
+* For example, you can run `gith branch testBranchName && gith shortcut win32 && gith shortcut build` (Substitute `&&` for `;` if using Powershell)
