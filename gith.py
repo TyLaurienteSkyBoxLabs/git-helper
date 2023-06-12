@@ -154,6 +154,20 @@ def vs_has_distributed_option(search_region):
         return True
     else:
         return False
+
+def vs_has_compile_option(search_region):
+    # Specify the text to search for
+    compile_text = "Compile"
+    analysis_text = "Analysis"
+    
+    # Perform OCR on the specified region
+    extracted_text = ocr_text(search_region)
+    
+    # Check if the target text is present in the extracted text
+    if (compile_text.lower() in extracted_text.lower()) or (analysis_text.lower() in extracted_text.lower()):
+        return True
+    else:
+        return False
     
 def wait_for_vs_load(search_region):
     # Specify the text to search for
@@ -194,9 +208,17 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
 
         hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
+        hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         pyautogui.press("up")
         time.sleep(1)
+
+        if hasCompileOption:
+            pyautogui.press("up")
+            time.sleep(1)
+            pyautogui.press("up")
+            time.sleep(1)
+
         pyautogui.press("enter")
         time.sleep(1)
         pyautogui.press("down")
