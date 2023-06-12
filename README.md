@@ -24,7 +24,7 @@ The tool can
 ### Allow gith to run globally in Git Bash
 1. Navigate to your user folder (`%USERPROFILE%`)
 2. Create or open `.bash_profile`
-3. Add the below command into the file, subsituting `path/to/git-helper/` for the actual path to git-helper
+3. Add the below command into the file, subsituting `path/to/git-helper/` for the actual path to git-helper. (Make sure to use forrward slashes`/` instead of back slashes `\` for the path)
 4. Save and re-launch git bash, you should now be able to run gith globablly, without the need for specifying.bat
 
 ```
