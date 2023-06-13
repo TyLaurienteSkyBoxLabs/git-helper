@@ -193,7 +193,7 @@ def open_visual_studio_distributed_build():
         os.startfile(sln_file)
 
         screenWidth, screenHeight = pyautogui.size()
-        vsSearchRegion = (0, 0, screenWidth, screenHeight)
+        vsSearchRegion = (screenWidth * 0.125, 0, screenWidth * 0.4, screenHeight * 0.5)
 
         # Wait for Visual Studio to open and the solution to load
         wait_for_vs_load(vsSearchRegion)
@@ -208,10 +208,11 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
 
         hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
-        hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         pyautogui.press("up")
         time.sleep(1)
+
+        hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         if hasCompileOption:
             pyautogui.press("up")
