@@ -145,29 +145,39 @@ def ocr_text(region):
 def vs_has_distributed_option(search_region):
     # Specify the text to search for
     target_text = "Distributed"
+
+    found = False
+    search_time = 3
+    start_time = time.time()
     
-    # Perform OCR on the specified region
-    extracted_text = ocr_text(search_region)
+    while time.time() - start_time < search_time:
+        # Perform OCR on the specified region
+        extracted_text = ocr_text(search_region)
+
+        # Check if the target text is present in the extracted text
+        if target_text.lower() in extracted_text.lower():
+            found = True
     
-    # Check if the target text is present in the extracted text
-    if target_text.lower() in extracted_text.lower():
-        return True
-    else:
-        return False
+    return found
 
 def vs_has_compile_option(search_region):
     # Specify the text to search for
     compile_text = "Compile"
     analysis_text = "Analysis"
+
+    found = False
+    search_time = 3
+    start_time = time.time()
     
-    # Perform OCR on the specified region
-    extracted_text = ocr_text(search_region)
+    while time.time() - start_time < search_time:
+        # Perform OCR on the specified region
+        extracted_text = ocr_text(search_region)
+
+        # Check if the target text is present in the extracted text
+        if (compile_text.lower() in extracted_text.lower()) or (analysis_text.lower() in extracted_text.lower()):
+            found = True
     
-    # Check if the target text is present in the extracted text
-    if (compile_text.lower() in extracted_text.lower()) or (analysis_text.lower() in extracted_text.lower()):
-        return True
-    else:
-        return False
+    return found
     
 def wait_for_vs_load(search_region):
     # Specify the text to search for
@@ -207,12 +217,10 @@ def open_visual_studio_distributed_build():
         pyautogui.hotkey('b')
         time.sleep(1)
 
-        hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
+        hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         pyautogui.press("up")
         time.sleep(1)
-
-        hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         if hasCompileOption:
             pyautogui.press("up")
@@ -238,6 +246,8 @@ def open_visual_studio_distributed_build():
         time.sleep(1)
         pyautogui.hotkey('b')
         time.sleep(1)
+
+        hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
 
         if hasDistributedOption:
             pyautogui.press("down")
