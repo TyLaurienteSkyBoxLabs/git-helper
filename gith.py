@@ -203,7 +203,7 @@ def open_visual_studio_distributed_build():
         os.startfile(sln_file)
 
         screenWidth, screenHeight = pyautogui.size()
-        vsSearchRegion = (screenWidth * 0.125, 0, screenWidth * 0.4, screenHeight * 0.5)
+        vsSearchRegion = (0, 0, screenWidth, screenHeight)
 
         # Wait for Visual Studio to open and the solution to load
         wait_for_vs_load(vsSearchRegion)
