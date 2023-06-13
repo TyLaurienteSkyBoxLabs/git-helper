@@ -667,7 +667,7 @@ def init_arg_parser():
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
-    subparsers.add_parser("build", help="Build VS solution in current repo for Release and Distributed, if option is present")
+    subparsers.add_parser("build", aliases=["bu"], help="Build VS solution in current repo for Release and Distributed, if option is present")
 
     return parser
 
@@ -712,7 +712,7 @@ def main():
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
-    elif args.command == "build":
+    elif args.command == "build" or args.command == "bu":
         open_visual_studio_distributed_build()
     else:
         parser.print_help()
