@@ -5,6 +5,11 @@ import configparser
 import re
 from typing import IO, NoReturn
 import time
+<<<<<<< HEAD
+=======
+import sys
+import platform
+>>>>>>> f24f6ef (Modify build command to run the command in a new shell window, only working on Windows)
 import pyautogui
 import pytesseract
 
@@ -342,23 +347,27 @@ def open_visual_studio_distributed_build(sln_path):
     else:
         print("Error: No .sln file found in the build directory.")
 
-def generate_and_build_minecraft_platform(platform="win32"):
+def generate_and_build_minecraft_platform(mc_platform="win32"):
     gen_proj_script = ""
     generate_and_build_command = []
     gen_proj_directory = "gen_proj"
 
-    if platform.lower() == "win32":
+    if mc_platform.lower() == "win32":
         gen_proj_script = os.path.join(gen_proj_directory, "win32_renderdragon_x64.py")
         generate_and_build_command = ["python", gen_proj_script, "--config", "Release", "--build"]
-    elif platform.lower() == "uwp":
+    elif mc_platform.lower() == "uwp":
         gen_proj_script = os.path.join(gen_proj_directory, "uwp_renderdragon_x64_win10.py")
         generate_and_build_command = ["python", gen_proj_script, "--config", "Release", "--build"]
-    elif platform.lower() == "android":
+    elif mc_platform.lower() == "android":
         gen_proj_script = os.path.join(gen_proj_directory, "android_ogl_arm64-v8a_google.py")
         generate_and_build_command = ["python", gen_proj_script, "--config", "Release", "--build", "--package"]
     else:
-        print(f"Error: '{platform}' is not a valid platform, choose between (Win32, UWP and Android)")
+        print(f"Error: '{mc_platform}' is not a valid platform, choose between (Win32, UWP and Android)")
         return
+
+    # todo: add linux / macOS support
+    if platform.system() == "Windows":
+        generate_and_build_command = ["start", "cmd", "/k"] + generate_and_build_command
 
     return_status = run_command(generate_and_build_command, 4800, 0)
 
@@ -903,7 +912,7 @@ def init_arg_parser():
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
     vsbuild_parser = subparsers.add_parser("build", aliases=["bu"], help="Generate and build a Minecraft platform ---- Options: Win32, UWP, Android")
-    vsbuild_parser.add_argument("platform", nargs="?", default="win32", help="win32, uwp, android")
+    vsbuild_parser.add_argument("mc_platform", nargs="?", default="win32", help="win32, uwp, android")
 
     vsbuild_parser = subparsers.add_parser("vs-build", aliases=["vsb"], help="Build VS solution in current repo for Release and Distributed, if option is present")
     vsbuild_parser.add_argument("sln_path", nargs="?", default="", help="Specify a specific solution to build with")
@@ -954,7 +963,7 @@ def main():
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
     elif args.command == "build" or args.command == "bu":
-        generate_and_build_minecraft_platform(args.platform)
+        generate_and_build_minecraft_platform(args.mc_platform)
     elif args.command == "vs-build" or args.command == "vsb":
         open_visual_studio_distributed_build(args.sln_path)
     elif unknown_args:
