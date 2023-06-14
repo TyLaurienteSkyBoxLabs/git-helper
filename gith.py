@@ -347,7 +347,7 @@ def open_visual_studio_distributed_build(sln_path):
     else:
         print("Error: No .sln file found in the build directory.")
 
-def generate_and_build_minecraft_platform(mc_platform="win32"):
+def generate_and_build_mc_platform(mc_platform="win32"):
     gen_proj_script = ""
     generate_and_build_command = []
     gen_proj_directory = "gen_proj"
@@ -911,7 +911,7 @@ def init_arg_parser():
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
-    vsbuild_parser = subparsers.add_parser("build", aliases=["bu"], help="Generate and build a Minecraft platform ---- Options: Win32, UWP, Android")
+    vsbuild_parser = subparsers.add_parser("build", aliases=["bu"], help="Generate and build a MC platform ---- Options: Win32, UWP, Android")
     vsbuild_parser.add_argument("mc_platform", nargs="?", default="win32", help="win32, uwp, android")
 
     vsbuild_parser = subparsers.add_parser("vs-build", aliases=["vsb"], help="Build VS solution in current repo for Release and Distributed, if option is present")
@@ -963,7 +963,7 @@ def main():
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
     elif args.command == "build" or args.command == "bu":
-        generate_and_build_minecraft_platform(args.mc_platform)
+        generate_and_build_mc_platform(args.mc_platform)
     elif args.command == "vs-build" or args.command == "vsb":
         open_visual_studio_distributed_build(args.sln_path)
     elif unknown_args:

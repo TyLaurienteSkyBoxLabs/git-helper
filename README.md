@@ -1,6 +1,6 @@
 ## Git Helper
 
-*This tool is a private version of the [git-helper repo](https://github.com/TyLauriente/git-helper) that has been tailored for Minecraft devs*
+*This tool is a private version of the [git-helper repo](https://github.com/TyLauriente/git-helper) that has been tailored for MC devs*
 This is a tool meant to help speed up the process of using git.
 The tool can
 * Cache you current repo so that you can enter git commands without navigating to your repo directory
@@ -99,7 +99,7 @@ gith() {
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
 * `gith build [platform]`
-  * This command will generate a Minecraft solution in a new shell window.
+  * This command will generate an MC solution in a new shell window.
   * By default, Win32 will be ran
   * You can also specify either `UWP`, or `Android`.
   * These are the only platforms currently supported
