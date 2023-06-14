@@ -19,19 +19,12 @@ The tool can
 #### Steps for setup
 1. To get started, download and extract both the gith.py and gith.bat files to your install directory of choice.
 2. Ensure install directory path does not have any spaces in it, or Git Bash usage may not work correctly
-<<<<<<< HEAD
 3. Add your install directory to your `Path` environment variable. This allows the `gith` command to work globally across your shell.
 4. Run `git config --global --add safe.directory '*'`
 5. Run `python -m pip install pyautogui`
 6. Run `python -m pip install pytesseract`
 7. Install `tesseract-ocr-w64-setup.exe`
 8. Add `C:\Program Files\Tesseract-OCR` to your `Path` environment variable
-=======
-3. Add your install directory to your `Path` environment variable. This allows the `gith` command to work globally across your shell.command to work globally across your shell.
-4. Run git config --global --add safe.directory '*'
-5. Run `python -m pip install pyautogui`
-6. Run `python -m pip install pytesseract`
->>>>>>> 0cbb779 (Add check for if distributed option is present in VS, otherwise perform a regular build)
 
 ### Allow gith to run globally in Git Bash
 1. Navigate to your user folder (`%USERPROFILE%`)
