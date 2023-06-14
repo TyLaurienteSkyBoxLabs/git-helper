@@ -84,8 +84,9 @@ gith() {
   * If you would like to delete a profile, you can add the `delete` command before the name. Ex: `gith profile delete testProfileName`
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
-* `gith build`
-  * This command will open the first Visual Studio with the first .sln file found in the build folder located inside the repo of your current profile. 
+* `gith vs-build [sln_path]`
+  * This command will open Visual Studio with the first .sln file found in the build folder located inside the repo of your current profile. 
+  * A path can be provided to use a specific solution file. This can be useful if there is multiple solutions in your build directory.
   * Then it will navigate to the configuration manager, and select Release configuration.
   * Finally, it will select distributed solution build if available, otherwise normal build.
   * This means this command can be paried with others so that no input is needed from the time of branching to building.
