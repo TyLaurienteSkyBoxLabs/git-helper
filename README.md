@@ -98,6 +98,12 @@ gith() {
   * This command allows you to delete the profile that is currently selected. After running this command, the current profile will be set to the default.
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
+* `gith build [platform]`
+  * This command will generate a Minecraft solution in a new shell window.
+  * By default, Win32 will be ran
+  * You can also specify either `UWP`, or `Android`.
+  * These are the only platforms currently supported
+  * You can use shortcuts to add commands for other platforms of your choice
 * `gith vs-build [sln_path]`
   * This command will open Visual Studio with the first .sln file found in the build folder located inside the repo of your current profile. 
   * This means that you have to had already generated the solution before running this command.
