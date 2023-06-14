@@ -489,7 +489,7 @@ def init_arg_parser():
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
     repo_parser = subparsers.add_parser("repo", aliases=["r"], help="Set or update the repository path")
-    repo_parser.add_argument("directory", help="Path to the git repository")
+    repo_parser.add_argument("directory", nargs="?", default=os.getcwd(), help="Path to the git repository")
 
     status_parser = subparsers.add_parser("status", aliases=["s"], help="Show the status of the current profile ---- gith status [all]  ---- display all info")
     status_parser.add_argument("all", nargs="?", default=None, help="Print shortcuts and all profiles")

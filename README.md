@@ -36,8 +36,9 @@ gith() {
 
 ### Usage:
 [ ] *indicates optional parameter*
-* `gith repo $directory`
+* `gith repo [directory]`
   * Sets the git repo directory for the current profile, this will be cached for every time you begin using the tool.
+  * If no $directory path is passed in, the repo directory will default to your current shells current working directory
 * `gith status [all]`
   * Displays information about your current profile and current repo
   * Run `gith status all` to display extra information, such as a list of your profiles and the shortcuts that exist in your current profile.
