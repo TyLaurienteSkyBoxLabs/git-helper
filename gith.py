@@ -494,8 +494,8 @@ def init_arg_parser():
     status_parser = subparsers.add_parser("status", aliases=["s"], help="Show the status of the current profile ---- gith status [all]  ---- display all info")
     status_parser.add_argument("all", nargs="?", default=None, help="Print shortcuts and all profiles")
 
-    command_parser = subparsers.add_parser("command", aliases=["c"], help="Run a git command in the repo directory")
-    command_parser.add_argument("git_args", nargs=argparse.REMAINDER, help="Git command and arguments")
+    command_parser = subparsers.add_parser("command", aliases=["c"], help="Run a shell command in the repo directory")
+    command_parser.add_argument("command_args", nargs=argparse.REMAINDER, help="Command and arguments")
 
     subparsers.add_parser("sub-init", aliases=["su"], help="Initialize and update Git submodules recursively")
 
@@ -548,7 +548,7 @@ def main():
     elif args.command == "status" or args.command == "s":
         print_status(args.all)
     elif args.command == "command" or args.command == "c":
-        run_git_command(args.git_args)
+        run_command(args.command_args)
     elif args.command == "sub-init" or args.command == "su":
         run_git_command(["submodule", "update", "--init", "--recursive"])
         run_git_command(["submodule", "update", "--init", "--recursive"])

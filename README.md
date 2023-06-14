@@ -42,8 +42,8 @@ gith() {
 * `gith status [all]`
   * Displays information about your current profile and current repo
   * Run `gith status all` to display extra information, such as a list of your profiles and the shortcuts that exist in your current profile.
-* `gith command $git_command`
-  * Runs a git command to the repo in your current profile. This works from anywhere so you don't have to cd into your repo directory. Ex: `gith command rebase -i main`
+* `gith command $command`
+  * Runs a shell command to the repo directory that's in your current profile. This works from anywhere so you don't have to cd into your repo directory. Ex: `gith command git rebase -i main`
 * `gith subinit`
   * This command will update your submodules by running `git submodule update --init --recursive`
 * `gith clean`
