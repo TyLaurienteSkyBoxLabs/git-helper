@@ -197,6 +197,14 @@ def find_sln_file(directory):
                 return os.path.join(root, file)
     return None
 
+def is_partial_path(path):
+    cwd = os.getcwd()
+    if not os.path.isabs(path):
+        return True
+    if path.startswith(cwd):
+        return True
+    return False
+
 def ocr_text(region):
     # Take a screenshot of the specified region
     screenshot = pyautogui.screenshot(region=region)
@@ -259,9 +267,15 @@ def wait_for_vs_load(search_region):
     return True
 
 
-def open_visual_studio_distributed_build():
-    build_dir = os.path.join(get_repo_path(), 'build')
-    sln_file = find_sln_file(build_dir)
+def open_visual_studio_distributed_build(sln_path):
+    sln_file = sln_path
+
+    if is_partial_path(sln_file):
+        sln_file = os.path.join(os.getcwd(), sln_file)
+
+    if sln_path == "" or not os.path.isfile(sln_file) or not sln_file.endswith('.sln'):
+        build_dir = os.path.join(get_repo_path(), 'build')
+        sln_file = find_sln_file(build_dir)
 
     if sln_file:
         # Open the solution file in Visual Studio
@@ -866,7 +880,8 @@ def init_arg_parser():
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
-    subparsers.add_parser("build", aliases=["bu"], help="Build VS solution in current repo for Release and Distributed, if option is present")
+    vsbuild_parser = subparsers.add_parser("vs-build", aliases=["vsb"], help="Build VS solution in current repo for Release and Distributed, if option is present")
+    vsbuild_parser.add_argument("sln_path", nargs="?", default="", help="Specify a specific solution to build with")
 
     return parser
 
@@ -913,8 +928,8 @@ def main():
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
-    elif args.command == "build" or args.command == "bu":
-        open_visual_studio_distributed_build()
+    elif args.command == "vs-build" or args.command == "vsb":
+        open_visual_studio_distributed_build(args.sln_path)
     elif unknown_args:
         unknown_command = unknown_args[0]
         if not execute_shortcut_command(unknown_command, False):
