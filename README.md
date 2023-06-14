@@ -86,6 +86,7 @@ gith() {
   * This command will open a file explorer in the directory of your current profiles repo.
 * `gith vs-build [sln_path]`
   * This command will open Visual Studio with the first .sln file found in the build folder located inside the repo of your current profile. 
+  * This means that you have to had already generated the solution before running this command.
   * A path can be provided to use a specific solution file. This can be useful if there is multiple solutions in your build directory.
   * Then it will navigate to the configuration manager, and select Release configuration.
   * Finally, it will select distributed solution build if available, otherwise normal build.
