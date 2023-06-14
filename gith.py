@@ -7,6 +7,7 @@ import time
 import sys
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
+SHORTCUT_PREFIX = "^!short"
 
 def clean_path(path):
     path = path.replace('"', '')
@@ -417,7 +418,9 @@ def add_shortcut(shortcut_name, shortcut_command):
     if not config.has_section(current_profile):
         config.add_section(current_profile)
 
-    config.set(current_profile, shortcut_name, shortcut_command)
+    full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
+
+    config.set(current_profile, full_shortcut_name, shortcut_command)
 
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
@@ -437,12 +440,14 @@ def replace_variables(command):
 def execute_shortcut(shortcut_name):
     config = read_gith_config()
     current_profile = get_current_profile()
+    full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
 
-    if not config.has_section(current_profile) or not config.has_option(current_profile, shortcut_name):
+    if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
         print(f"No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
         return
 
-    shortcut_command = config.get(current_profile, shortcut_name)
+    shortcut_command = config.get(current_profile, full_shortcut_name)
+    shortcut_command = shortcut_command.replace(SHORTCUT_PREFIX, "")
     shortcut_command = replace_variables(shortcut_command)
     print(f"\nExecuting shortcut '{shortcut_name}': {shortcut_command}")
     os.system(shortcut_command)
@@ -475,10 +480,11 @@ def print_status(all=None):
 
     print("\nShortcuts in current profile:")
     if config.has_section(current_profile):
-        shortcuts = config.items(current_profile)
-        for shortcut_name, shortcut_command in shortcuts:
-            if shortcut_name not in ["repo_path", "branch_name", "current_profile"]:
-                print(f"{shortcut_name}: {shortcut_command}")
+        config_items = config.items(current_profile)
+        for item_name, value in config_items:
+            if SHORTCUT_PREFIX in item_name:
+                shortcut_name = item_name.replace(SHORTCUT_PREFIX, "")
+                print(f"{shortcut_name}: {value}")
 
     print("\nAll profiles:")
     for profile in profiles:
