@@ -128,7 +128,7 @@ def run_command(command, timeout=30, max_retries=5):
 
     while retries <= max_retries:
         output = ""
-        process = subprocess.Popen(command, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, cwd=get_repo_path(), stderr=subprocess.PIPE, shell=True)
         start_time = time.time()
         out = ""
 
@@ -159,9 +159,8 @@ def get_git_command(args):
     return ["git", "-C", repo_path] + args
 
 def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
-    git_command = get_git_command(args)
-    
-    output = run_command(git_command, timeout, max_retries)
+    args = ["git"] + args
+    output = run_command(args, timeout, max_retries)
     if (output == "^!FAILURE^!"):
         return False
     
