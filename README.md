@@ -44,7 +44,7 @@ gith() {
   * Run `gith status all` to display extra information, such as a list of your profiles and the shortcuts that exist in your current profile.
 * `gith command $command`
   * Runs a shell command to the repo directory that's in your current profile. This works from anywhere so you don't have to cd into your repo directory. Ex: `gith command git rebase -i main`
-* `gith subinit`
+* `gith sub-init`
   * This command will update your submodules by running `git submodule update --init --recursive`
 * `gith clean`
   * This command will clean all non-git files in your repo using `git clean -ffdx`. This includes navigating to all sub-modules and running `git clean -ffdx` as well.
@@ -57,9 +57,9 @@ gith() {
   * This command will do a number of steps to pull latest main into your current checked out branch.
   * This includes: checking out the main branch, fetching changes from remote, resseting local main to remote changes, checking out the previous branch that was checked out, and merging main into that branch.
   * By default, merge is used so as to not be destructive to history, run `git fetch rebase` to rebase instead.
-* `gith fetch $branch_name`
+* `gith fetch-branch $branch_name`
   * This command will fetch a remote branch, checkout to the fetch branch and reset the local branch to the remote branch
-* `gith mainbranch $branch_name`
+* `gith main-branch $branch_name`
   * This command allows specifying a different "main" branch name, for projects that don't use "main" as their main branch. This will be used as the base branch for fetching and branching.
 * `gith remote $remote_name`
   * This command allows specifying a different "origin" remote name, for projects that use multiple remotes. This will be used as the base branch for fetching and branching.
@@ -69,7 +69,7 @@ gith() {
   * This command has two purposes, to save shortcuts and to execute saved shortcuts. 
   * To add a new shortcut, enter both a shortcut name, ans a command for it. If the command has any spaces in it, make sure to encapsulate it in quots "". Ex: `gith shortcut testName "program Folder/testProgram.py"`
   * To execute this new command, simply enter its name only when running. Ex: `gith shortcut testName`
-* `gith addprofile [copy] $name`
+* `gith add-profile [copy] $name`
   * This command creates a new profile and sets it as our current.
   * Profiles allow differnt repos to be cached so that you can quickly jump between different projects. Shortcuts and mainbranch overrides are also unique to each profile.
   * To create a new profile, type `gith addprofile testProfileName`. This will create a new profile called testProfileName which will be blank.
