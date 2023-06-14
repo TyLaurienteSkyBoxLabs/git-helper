@@ -1,5 +1,6 @@
 ## Git Helper
 
+*This tool is a private version of the [git-helper repo](https://github.com/TyLauriente/git-helper) that has been tailored for Minecraft devs*
 This is a tool meant to help speed up the process of using git.
 The tool can
 * Cache you current repo so that you can enter git commands without navigating to your repo directory
