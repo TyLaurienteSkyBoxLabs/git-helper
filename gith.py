@@ -369,10 +369,7 @@ def generate_and_build_mc_platform(mc_platform="win32"):
     if platform.system() == "Windows":
         generate_and_build_command = ["start", "cmd", "/k"] + generate_and_build_command
 
-    return_status = run_command(generate_and_build_command, 4800, 0)
-
-    if return_status == "^!FAILURE^!":
-        print("Error: The build timed out after 1 hour and 20 minutes")
+    subprocess.Popen(generate_and_build_command, cwd=get_repo_path(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, shell=True)
 
 def run_command(command, max_time=50, max_retries=3):
     retries = 0
