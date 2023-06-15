@@ -165,6 +165,7 @@ def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
         return False
     
     if "CONFLICT" in output:
+        print("Error: a conflict occured during git command execution, please resolve before proceeding")
         return False
 
     return True
@@ -236,6 +237,10 @@ def fetch_command(rebase=False):
     remote_name = get_remote_name()
     passed = False
 
+    print("Stashing local changes")
+    run_git_command(["add", "."])
+    run_git_command(["stash"])
+
     print(f"Checking out main branch: {main_branch}")
     passed = run_git_command(["checkout", main_branch])
     if not passed:
@@ -264,9 +269,12 @@ def fetch_command(rebase=False):
     else:
         print(f"\nMerging {main_branch} into {fetch_branch}")
         passed = run_git_command(["merge", main_branch])
+    
+    print("Auto merging stashed changes")
+    passed = run_git_command(["stash", "pop"])
 
     if not passed:
-        print("Could not rebase branch, there were conflicts")
+        print("Could not auto merge stashed changes, aborting fetch")
         return
 
     print("\nInitializing and updating submodules")
