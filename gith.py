@@ -229,14 +229,13 @@ def vs_has_distributed_option(search_region):
 
         # Check if the target text is present in the extracted text
         if target_text.lower() in extracted_text.lower():
-            found = True
+            return True
     
     return found
 
 def vs_has_compile_option(search_region):
     # Specify the text to search for
     compile_text = "Compile"
-    analysis_text = "Analysis"
 
     found = False
     search_time = 3
@@ -247,8 +246,8 @@ def vs_has_compile_option(search_region):
         extracted_text = ocr_text(search_region)
 
         # Check if the target text is present in the extracted text
-        if (compile_text.lower() in extracted_text.lower()) or (analysis_text.lower() in extracted_text.lower()):
-            found = True
+        if compile_text.lower() in extracted_text.lower():
+            return True
     
     return found
     
