@@ -5,11 +5,7 @@ import configparser
 import re
 from typing import IO, NoReturn
 import time
-<<<<<<< HEAD
-=======
-import sys
 import platform
->>>>>>> f24f6ef (Modify build command to run the command in a new shell window, only working on Windows)
 import pyautogui
 import pytesseract
 
