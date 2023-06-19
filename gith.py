@@ -253,12 +253,12 @@ def vs_has_compile_option(search_region):
     
 def wait_for_vs_load(search_region):
     # Specify the text to search for
-    debugger_redy_text = "Local Windows Debugger"
+    debugger_redy_text = "Debugger"
     extracted_text = ""
     timeout_time = 40
     start_time = time.time()
     
-    while not debugger_redy_text in extracted_text:
+    while not (debugger_redy_text.lower() in extracted_text.lower()):
         if time.time() - start_time > timeout_time:
             return False
         extracted_text = ocr_text(search_region)
