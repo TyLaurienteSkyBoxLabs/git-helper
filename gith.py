@@ -7,7 +7,7 @@ import time
 import sys
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
-SHORTCUT_PREFIX = "^!short"
+SHORTCUT_PREFIX = "^#short"
 
 def clean_path(path):
     path = path.replace('"', '')
@@ -152,7 +152,7 @@ def run_command(command, timeout=30, max_retries=5):
         return output
             
     print(f"Command failed after {max_retries} retries.")
-    return "^!FAILURE^!"
+    return "^#FAILURE^#"
 
 def get_git_command(args):
     repo_path = get_repo_path()
@@ -161,7 +161,7 @@ def get_git_command(args):
 def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
     args = ["git"] + args
     output = run_command(args, timeout, max_retries)
-    if (output == "^!FAILURE^!"):
+    if (output == "^#FAILURE^#"):
         return False
     
     if "CONFLICT" in output:
@@ -437,10 +437,10 @@ def add_shortcut(shortcut_name, shortcut_command):
 # Function to replace variables in the command
 def replace_variables(command):
     count = 0
-    while command.find("^!") != -1 and count < 20:
+    while command.find("^#") != -1 and count < 20:
         count += 1
-        if command.find("^!repo_path") != -1:
-            command = command.replace("^!repo_path", get_repo_path())
+        if command.find("^#repo_path") != -1:
+            command = command.replace("^#repo_path", get_repo_path())
 
     return command
 

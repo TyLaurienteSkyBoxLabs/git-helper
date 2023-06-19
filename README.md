@@ -83,9 +83,9 @@ gith() {
 
 ### Shortcut macros
 * Shortcut macros allow for certain characters to be interpreted by `gith` to insert certain values.
-* `^!repo_path`
-  * If this text is specified in a shortcut, the text `^!repo_path` will be substituted for the repo directory that is in the current profile
-  * An example of a shortcut that makes use of this is: `gith shortcut start-build "python ^!repo_path/project_gen/start_build.py`
+* `^#repo_path`
+  * If this text is specified in a shortcut, the text `^#repo_path` will be substituted for the repo directory that is in the current profile
+  * An example of a shortcut that makes use of this is: `gith shortcut start-build "python ^#repo_path/project_gen/start_build.py`
 
 ### Chaining shortcuts
 * You can chain shortcuts together by calling `gith` multiple times within a shortcut. 
