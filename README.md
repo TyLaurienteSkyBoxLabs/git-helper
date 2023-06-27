@@ -57,14 +57,17 @@ gith() {
   * This command will do a number of steps to pull latest main into your current checked out branch.
   * This includes: checking out the main branch, fetching changes from remote, resseting local main to remote changes, checking out the previous branch that was checked out, and merging main into that branch.
   * By default, merge is used so as to not be destructive to history, run `git fetch rebase` to rebase instead.
+  * **Be careful**, this command will erase your build files and any other git ignored files
 * `gith fetch-branch $branch_name`
   * This command will fetch a remote branch, checkout to the fetch branch and reset the local branch to the remote branch
+  * **Be careful**, this command will erase your build files and any other git ignored files
 * `gith main-branch $branch_name`
   * This command allows specifying a different "main" branch name, for projects that don't use "main" as their main branch. This will be used as the base branch for fetching and branching.
 * `gith remote $remote_name`
   * This command allows specifying a different "origin" remote name, for projects that use multiple remotes. This will be used as the base branch for fetching and branching.
 * `gith branch $branch_name`
   * This command will do all of the same steps as fetch, but instead of using the previously checked out branch, it will create a new one off of main using the name specified.
+  * **Be careful**, this command will erase your build files and any other git ignored files
 * `gith shortcut $shortcut_name [$shortcut_command]`
   * This command has two purposes, to save shortcuts and to execute saved shortcuts. 
   * To add a new shortcut, enter both a shortcut name, ans a command for it. If the command has any spaces in it, make sure to encapsulate it in quots "". Ex: `gith shortcut testName "program Folder/testProgram.py"`

@@ -241,7 +241,7 @@ def fetch_command(rebase=False):
     run_git_command(["add", "."])
     run_git_command(["stash"])
 
-    print(f"Checking out main branch: {main_branch}")
+    print(f"\nChecking out main branch: {main_branch}")
     passed = run_git_command(["checkout", main_branch])
     if not passed:
         return
@@ -270,7 +270,7 @@ def fetch_command(rebase=False):
         print(f"\nMerging {main_branch} into {fetch_branch}")
         passed = run_git_command(["merge", main_branch])
     
-    print("Auto merging stashed changes")
+    print("\nAuto merging stashed changes")
     passed = run_git_command(["stash", "pop"])
 
     if not passed:
@@ -304,6 +304,9 @@ def fetch_branch_command(fetch_branch):
     print("\nUpdating submodules with `git submodule update --init --recursive")
     run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+
+    print("\nCleaning non-git files")
+    clean_non_git_files()
 
 def branch_command(branch_name):
     main_branch = get_branch_name()
