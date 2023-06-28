@@ -50,6 +50,7 @@ gith() {
   * This command will clean all non-git files in your repo using `git clean -ffdx`. This includes navigating to all sub-modules and running `git clean -ffdx` as well.
 * `git commit $commit_message`
   * This command will add all untracked changes using `git add .` and then proceed to commit the changes by running `git commit -m"$commit_message"`
+  * Submodule changes will be ignored, unless added before running the command.
 * `git push [force]`
   * This command will push changes to the remote that is has been specified by the `gith remote` command (origin by default).
   * You can run `git push force` to perform a force push.
