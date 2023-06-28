@@ -219,7 +219,26 @@ def clean_non_git_files():
     clean_submodules()
 
 def commit_command(message):
-    run_git_command(["add", "."])
+    # Logic to only add non-submodule changes
+    repo_path = get_repo_path()
+    submodule_command = ["git", "submodule", "foreach"]
+    status_command = ["git", "status"]
+
+    status_files = subprocess.Popen(status_command, cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    status_files, stderr = status_files.communicate()
+    if status_files is not None:
+        status_files = status_files.decode()
+        status_files = status_files.replace("modified:", "")
+        status_files = status_files.split('\n')
+
+
+    for file in status_files:
+        file = file.lstrip()
+        file_path = os.path.join(repo_path, file)
+
+        if os.path.isfile(file_path):
+            run_git_command(["add", file])
+            
     run_git_command(["commit", "-m", clean_path(message)])
 
 def push_command(force):
