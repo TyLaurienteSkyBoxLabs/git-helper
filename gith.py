@@ -123,25 +123,17 @@ def set_remote_name(remote_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def run_command(command, timeout=30, max_retries=5):
+def run_command(command, max_time=30, max_retries=5):
     retries = 0
 
     while retries <= max_retries:
         output = ""
-        process = subprocess.Popen(command, cwd=get_repo_path(), stderr=subprocess.PIPE, shell=True)
-        start_time = time.time()
-        out = ""
 
-        while time.time() - start_time < timeout and (process.poll() is None or out != b''):
-            out = process.stderr.read(1)
-            if out == b'' and process.poll() != None:
-                break
-            if out != '':
-                output += out.decode()
-                sys.stdout.write(out.decode())
-                sys.stdout.flush()
-
-        if time.time() - start_time >= timeout:
+        try:
+            process = subprocess.run(command, cwd=get_repo_path(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, timeout=max_time)
+            output = process.stdout.decode() + process.stderr.decode()
+            print(output)
+        except subprocess.TimeoutExpired:
             if (retries + 1) < max_retries:
                 retries += 1
                 print(f"Command timed out. (Attempt {retries}) Retrying...")
@@ -263,6 +255,7 @@ def fetch_command(rebase=False):
     print(f"\nChecking out main branch: {main_branch}")
     passed = run_git_command(["checkout", main_branch])
     if not passed:
+        print(f"Error: unable to checkout branch '{main_branch}'")
         return
 
     print(f"\nRunning 'git remote prune {remote_name}'")
@@ -272,11 +265,13 @@ def fetch_command(rebase=False):
     run_git_command(["fetch", remote_name, main_branch], 20)
     passed = run_git_command(["fetch", remote_name, main_branch])
     if not passed:
+        print(f"Error: Unable to fetch branch '{main_branch}' at remote '{remote_name}'")
         return
 
     print(f"\nResetting branch: {main_branch} to {remote_name}/{main_branch}")
     passed = run_git_command(["reset", "--hard", f"{remote_name}/{main_branch}"])
     if not passed:
+        print("Error: Unable to reset branch")
         return
 
     print(f"\nChecking out the fetch branch: {fetch_branch}")
@@ -294,12 +289,14 @@ def fetch_command(rebase=False):
 
     if not passed:
         print("Could not auto merge stashed changes, aborting fetch")
+        print("Error: Unable to auto merge stashed changes")
         return
 
     print("\nInitializing and updating submodules")
     run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
     if not passed:
+        print("Error: Unable to update submodules")
         return
 
     print("\nCleaning non-git files")
@@ -312,6 +309,7 @@ def fetch_branch_command(fetch_branch):
     run_git_command(["fetch", remote_name, fetch_branch], 20)
     passed = run_git_command(["fetch", remote_name, fetch_branch])
     if not passed:
+        print(f"Error: unable to fetch branch '{fetch_branch}'")
         return
     
     print(f"\nChecking out fetch branch: {fetch_branch}")
@@ -335,6 +333,7 @@ def branch_command(branch_name):
     print(f"Checking out main branch: {main_branch}")
     passed = run_git_command(["checkout", main_branch])
     if not passed:
+        print(f"Error: unable to checkout branch '{main_branch}'")
         return
 
     print(f"\nRunning 'git remote prune {remote_name}'")
@@ -344,23 +343,27 @@ def branch_command(branch_name):
     run_git_command(["fetch", remote_name, main_branch])
     passed = run_git_command(["fetch", remote_name, main_branch])
     if not passed:
+        print(f"Error: Unable to fetch branch '{main_branch}' at remote '{remote_name}'")
         return
 
     print(f"\nResetting branch: {main_branch} to {remote_name}/{main_branch}")
     passed = run_git_command(["reset", "--hard", f"{remote_name}/{main_branch}"])
     if not passed:
+        print("Error: Unable to reset branch")
         return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
     run_git_command(["branch", "-D", branch_name], 20, 1, False)
     passed = run_git_command(["checkout", "-b", branch_name])
     if not passed:
+        print("Error: unable to create new branch")
         return
 
     print("\nInitializing and updating submodules")
     run_git_command(["submodule", "update", "--init", "--recursive"])
     passed = run_git_command(["submodule", "update", "--init", "--recursive"])
     if not passed:
+        print("Error: failed to update submodules")
         return
 
     print("\nCleaning non-git files")
