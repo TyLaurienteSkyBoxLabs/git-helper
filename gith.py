@@ -3,8 +3,6 @@ import argparse
 import subprocess
 import configparser
 import re
-import time
-import sys
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^#short"
@@ -123,20 +121,18 @@ def set_remote_name(remote_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def run_command(command, max_time=30, max_retries=5):
+def run_command(command, max_time=50, max_retries=3):
     retries = 0
 
     while retries <= max_retries:
         output = ""
 
         try:
-            process = subprocess.run(command, cwd=get_repo_path(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, timeout=max_time)
-            output = process.stdout.decode() + process.stderr.decode()
-            print(output)
+            subprocess.run(command, cwd=get_repo_path(), universal_newlines=True, timeout=max_time)
         except subprocess.TimeoutExpired:
             if (retries + 1) < max_retries:
                 retries += 1
-                print(f"Command timed out. (Attempt {retries}) Retrying...")
+                print(f"\n\nCommand timed out. (Attempt {retries}) Retrying...")
                 continue
             else:
                 break
@@ -150,7 +146,7 @@ def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args, timeout=80, max_retries=5, printOutput=True):
+def run_git_command(args, timeout=50, max_retries=3):
     args = ["git"] + args
     output = run_command(args, timeout, max_retries)
     if (output == "^#FAILURE^#"):
@@ -210,10 +206,13 @@ def clean_non_git_files():
 
     clean_submodules()
 
-def commit_command(message):
+def submodule_command():
+    run_git_command(["submodule", "update", "--init", "--recursive"], 550, 0)
+    return run_git_command(["submodule", "update", "--init", "--recursive"], 20, 1)
+
+def get_status_files():
     # Logic to only add non-submodule changes
     repo_path = get_repo_path()
-    submodule_command = ["git", "submodule", "foreach"]
     status_command = ["git", "status"]
 
     status_files = subprocess.Popen(status_command, cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -223,13 +222,26 @@ def commit_command(message):
         status_files = status_files.replace("modified:", "")
         status_files = status_files.split('\n')
 
+        return_files = []
+        for file in status_files:
+            file = file.lstrip()
+            file_path = os.path.join(get_repo_path(), file)
+
+            if os.path.isfile(file_path):
+                return_files.append()
+
+        return return_files
+    
+    return []
+
+def add_without_submodules():
+    status_files = get_status_files()
 
     for file in status_files:
-        file = file.lstrip()
-        file_path = os.path.join(repo_path, file)
+        run_git_command(["add", file])
 
-        if os.path.isfile(file_path):
-            run_git_command(["add", file])
+def commit_command(message):
+    add_without_submodules()
             
     run_git_command(["commit", "-m", clean_path(message)])
 
@@ -248,9 +260,12 @@ def fetch_command(rebase=False):
     remote_name = get_remote_name()
     passed = False
 
-    print("Stashing local changes")
-    run_git_command(["add", "."])
-    run_git_command(["stash"])
+    status_file_count = len(get_status_files())
+
+    if status_file_count > 0:
+        print("Stashing local changes")
+        add_without_submodules()
+        run_git_command(["stash"])
 
     print(f"\nChecking out main branch: {main_branch}")
     passed = run_git_command(["checkout", main_branch])
@@ -284,17 +299,17 @@ def fetch_command(rebase=False):
         print(f"\nMerging {main_branch} into {fetch_branch}")
         passed = run_git_command(["merge", main_branch])
     
-    print("\nAuto merging stashed changes")
-    passed = run_git_command(["stash", "pop"])
+    if status_file_count > 0:
+        print("\nAuto merging stashed changes")
+        passed = run_git_command(["stash", "pop"])
 
-    if not passed:
-        print("Could not auto merge stashed changes, aborting fetch")
-        print("Error: Unable to auto merge stashed changes")
-        return
+        if not passed:
+            print("Could not auto merge stashed changes, aborting fetch")
+            print("Error: Unable to auto merge stashed changes")
+            return
 
     print("\nInitializing and updating submodules")
-    run_git_command(["submodule", "update", "--init", "--recursive"])
-    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+    passed = submodule_command()
     if not passed:
         print("Error: Unable to update submodules")
         return
@@ -319,8 +334,7 @@ def fetch_branch_command(fetch_branch):
     run_git_command(["reset", "--hard", f"{remote_name}/{fetch_branch}"])
 
     print("\nUpdating submodules with `git submodule update --init --recursive")
-    run_git_command(["submodule", "update", "--init", "--recursive"])
-    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+    passed = submodule_command()
 
     print("\nCleaning non-git files")
     clean_non_git_files()
@@ -360,8 +374,7 @@ def branch_command(branch_name):
         return
 
     print("\nInitializing and updating submodules")
-    run_git_command(["submodule", "update", "--init", "--recursive"])
-    passed = run_git_command(["submodule", "update", "--init", "--recursive"])
+    passed = submodule_command()
     if not passed:
         print("Error: failed to update submodules")
         return
@@ -588,8 +601,7 @@ def main():
     elif args.command == "command" or args.command == "c":
         run_command(args.command_args)
     elif args.command == "sub-init" or args.command == "su":
-        run_git_command(["submodule", "update", "--init", "--recursive"])
-        run_git_command(["submodule", "update", "--init", "--recursive"])
+        submodule_command()
     elif args.command == "clean" or args.command == "cl":
         clean_non_git_files()
     elif args.command == "main-branch" or args.command == "mb":
