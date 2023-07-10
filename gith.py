@@ -367,7 +367,7 @@ def branch_command(branch_name):
         return
 
     print(f"\nCreating and checking out new branch: {branch_name}")
-    run_git_command(["branch", "-D", branch_name], 20, 1, False)
+    run_git_command(["branch", "-D", branch_name], 20, 1)
     passed = run_git_command(["checkout", "-b", branch_name])
     if not passed:
         print("Error: unable to create new branch")
