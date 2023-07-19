@@ -228,7 +228,7 @@ def get_status_files():
             file_path = os.path.join(get_repo_path(), file)
 
             if os.path.isfile(file_path):
-                return_files.append()
+                return_files.append(file_path)
 
         return return_files
     
