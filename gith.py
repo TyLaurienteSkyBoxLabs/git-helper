@@ -207,6 +207,7 @@ def clean_non_git_files():
     clean_submodules()
 
 def submodule_command():
+    run_git_command("submodule", "sync")
     run_git_command(["submodule", "update", "--init", "--recursive"], 550, 0)
     return run_git_command(["submodule", "update", "--init", "--recursive"], 20, 1)
 
