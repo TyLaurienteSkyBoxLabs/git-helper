@@ -277,8 +277,8 @@ def fetch_command(rebase=False):
     run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", remote_name, main_branch], 20)
-    passed = run_git_command(["fetch", remote_name, main_branch])
+    run_git_command(["fetch", remote_name, main_branch], 550, 0)
+    passed = run_git_command(["fetch", remote_name, main_branch], 50, 0)
     if not passed:
         print(f"Error: Unable to fetch branch '{main_branch}' at remote '{remote_name}'")
         return
@@ -321,8 +321,8 @@ def fetch_branch_command(fetch_branch):
     remote_name = get_remote_name()
     
     print(f"Fetching fetch branch: {fetch_branch}")
-    run_git_command(["fetch", remote_name, fetch_branch], 20)
-    passed = run_git_command(["fetch", remote_name, fetch_branch])
+    run_git_command(["fetch", remote_name, fetch_branch], 550, 0)
+    passed = run_git_command(["fetch", remote_name, fetch_branch], 50, 0)
     if not passed:
         print(f"Error: unable to fetch branch '{fetch_branch}'")
         return
@@ -354,8 +354,8 @@ def branch_command(branch_name):
     run_git_command(["remote", "prune", remote_name], 35, 1)
 
     print(f"\nFetching latest changes for branch: {main_branch}")
-    run_git_command(["fetch", remote_name, main_branch])
-    passed = run_git_command(["fetch", remote_name, main_branch])
+    run_git_command(["fetch", remote_name, main_branch], 550, 0)
+    passed = run_git_command(["fetch", remote_name, main_branch], 50, 0)
     if not passed:
         print(f"Error: Unable to fetch branch '{main_branch}' at remote '{remote_name}'")
         return
