@@ -266,8 +266,31 @@ def wait_for_vs_load(search_region):
 
     return True
 
+def close_visual_studio_windows():
+    print("Closing Visual Studio windows")
+    
+    # Use tasklist to get a list of running processes
+    try:
+        process_list = subprocess.check_output(["tasklist"], text=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return
+
+    # Find Visual Studio processes
+    visual_studio_processes = [line for line in process_list.splitlines() if "devenv.exe" in line]
+
+    # Terminate Visual Studio processes
+    for process in visual_studio_processes:
+        pid = int(process.split()[1])
+        try:
+            subprocess.check_output(["taskkill", "/F", "/PID", str(pid)])
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
+
 
 def open_visual_studio_distributed_build(sln_path):
+    close_visual_studio_windows()
+    
     sln_file = sln_path
 
     if is_partial_path(sln_file):
