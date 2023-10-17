@@ -69,10 +69,15 @@ gith() {
 * `gith branch $branch_name`
   * This command will do all of the same steps as fetch, but instead of using the previously checked out branch, it will create a new one off of main using the name specified.
   * **Be careful**, this command will erase your build files and any other git ignored files
-* `gith shortcut $shortcut_name [$shortcut_command]`
-  * This command has two purposes, to save shortcuts and to execute saved shortcuts. 
-  * To add a new shortcut, enter both a shortcut name, ans a command for it. If the command has any spaces in it, make sure to encapsulate it in quots "". Ex: `gith shortcut testName "program Folder/testProgram.py"`
-  * To execute this new command, simply enter its name only when running. Ex: `gith shortcut testName`
+* `gith add-shortcut $shortcut_name $shortcut_command [$current]`
+  * This command creates a new shortcut that can be used in all profiles by default.
+  * To create a new shortcut, enter both a shortcut name, and a command for it. If the command has any spaces in it, make sure to encapsulate it in quotes "". Ex: `gith shortcut testName "program Folder/testProgram.py"`
+  * To create a shortcut that can only be used in the current profile, add `current` to the end of the command. Ex: `gith shortcut testName "program Fodler/testProgram.py" current`
+  * Note that when using the `current` option, you must not be on the "default" profile. Meaning you must first run the `add-profile` command.
+  * Note that if a shortcut exists as both a global and a profile specific, the profile specific command will be used.
+* `gith shortcut $shortcut_name`
+  * This command will execute an existing shortcut. 
+  * To execute an existing shortcut, simply enter its name when running. Ex: `gith shortcut testName`
 * `gith add-profile [copy] $name`
   * This command creates a new profile and sets it as our current.
   * Profiles allow differnt repos to be cached so that you can quickly jump between different projects. Shortcuts and mainbranch overrides are also unique to each profile.

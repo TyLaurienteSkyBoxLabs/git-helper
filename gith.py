@@ -457,9 +457,16 @@ def switch_profile(profile_name, delete=False):
         set_current_profile(profile_name)
         print(f"Switched to profile: '{profile_name}'")
 
-def add_shortcut(shortcut_name, shortcut_command):
+def add_shortcut(shortcut_name, shortcut_command, current=False):
     config = read_gith_config()
-    current_profile = get_current_profile()
+    current_profile = "default"
+
+    if current:
+        current_profile = get_current_profile()
+
+        if current_profile == "default":
+            print("Error: Cannot create a profile specific shortcut when using the default profile, run the `add-profile` command then try again")
+            return
 
     if not config.has_section(current_profile):
         config.add_section(current_profile)
@@ -489,20 +496,16 @@ def execute_shortcut(shortcut_name):
     full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
 
     if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
-        print(f"No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
-        return
+        current_profile = "default"
+        if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
+            print(f"No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
+            return
 
     shortcut_command = config.get(current_profile, full_shortcut_name)
     shortcut_command = shortcut_command.replace(SHORTCUT_PREFIX, "")
     shortcut_command = replace_variables(shortcut_command)
     print(f"\nExecuting shortcut '{shortcut_name}': {shortcut_command}")
     os.system(shortcut_command)
-
-def shortcut_command(shortcut_name, shortcut_command=None):
-    if shortcut_command is not None:
-        add_shortcut(shortcut_name, shortcut_command)
-    else:
-        execute_shortcut(shortcut_name)
     
 def print_status(all=None):
     repo_path = get_repo_path()
@@ -524,8 +527,17 @@ def print_status(all=None):
     config = read_gith_config()
     profiles = config.sections()
 
-    print("\nShortcuts in current profile:")
-    if config.has_section(current_profile):
+    if config.has_section("default"):
+        print("\nGlobal Shortcuts:")
+        config_items = config.items("default")
+        for item_name, value in config_items:
+            if SHORTCUT_PREFIX in item_name:
+                shortcut_name = item_name.replace(SHORTCUT_PREFIX, "")
+                print(f"{shortcut_name}: {value}")
+
+
+    if config.has_section(current_profile) and current_profile != "default":
+        print("\nShortcuts in current profile:")
         config_items = config.items(current_profile)
         for item_name, value in config_items:
             if SHORTCUT_PREFIX in item_name:
@@ -574,9 +586,13 @@ def init_arg_parser():
     branch_parser = subparsers.add_parser("branch", aliases=["b"], help="Create and switch to a new branch")
     branch_parser.add_argument("name", help="Name of the new branch")
 
-    shortcut_parser = subparsers.add_parser("shortcut", aliases=["sc"], help="Add or execute a shortcut ---- Specify a name and command to save, or just a name to run")
+    shortcut_parser = subparsers.add_parser("add-shortcut", aliases=["asc"], help="Add a new shortcut ---- Specify a name as well as a command for the shortcut")
     shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
-    shortcut_parser.add_argument("shortcut_command", nargs="?", default=None, help="Command associated with the shortcut")
+    shortcut_parser.add_argument("shortcut_command", help="Command associated with the shortcut")
+    shortcut_parser.add_argument("current", nargs="?", default="", help="Option to specify if the shortcut is profile specific")
+
+    shortcut_parser = subparsers.add_parser("shortcut", aliases=["sc"], help="Execute a shortcut ---- Specify the name of an existing shortcut to run")
+    shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
 
     addprofile_parser = subparsers.add_parser("add-profile", aliases=["ap"], help="Add a new profile ---- gith addprofile [copy]  ----  copy current profile")
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
@@ -621,8 +637,11 @@ def main():
         fetch_branch_command(args.branch)
     elif args.command == "branch" or args.command == "b":
         branch_command(args.name)
+    elif args.command == "add-shortcut" or args.command == "asc":
+        current = args.current == "current"
+        add_shortcut(args.shortcut_name, args.shortcut_command, current)
     elif args.command == "shortcut" or args.command == "sc":
-        shortcut_command(args.shortcut_name, args.shortcut_command)
+        execute_shortcut(args.shortcut_name)
     elif args.command == "add-profile" or args.command == "ap":
         add_profile(args.name, args.copy)
     elif args.command == "profile" or args.command == "pr":
