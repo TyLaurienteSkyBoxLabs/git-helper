@@ -290,6 +290,9 @@ def close_visual_studio_windows():
 
 def open_visual_studio_distributed_build(sln_path):
     close_visual_studio_windows()
+    time.sleep(2)
+
+    keyboard_command_wait_time = 0.25
     
     sln_file = sln_path
 
@@ -309,58 +312,58 @@ def open_visual_studio_distributed_build(sln_path):
 
         # Wait for Visual Studio to open and the solution to load
         wait_for_vs_load(vsSearchRegion)
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         pyautogui.moveTo(screenWidth*0.5, screenHeight*.9)
 
         # Send keyboard shortcuts to select release configuration
         pyautogui.hotkey('alt')
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.hotkey('b')
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         hasCompileOption = vs_has_compile_option(vsSearchRegion)
 
         pyautogui.press("up")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         if hasCompileOption:
             pyautogui.press("up")
-            time.sleep(1)
+            time.sleep(keyboard_command_wait_time)
             pyautogui.press("up")
-            time.sleep(1)
+            time.sleep(keyboard_command_wait_time)
 
         pyautogui.press("enter")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.press("down")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.press("down")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.press("escape")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.press("escape")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.press("escape")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         # Send keyboard shortcuts to start distributed build
         pyautogui.hotkey('alt')
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
         pyautogui.hotkey('b')
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         hasDistributedOption = vs_has_distributed_option(vsSearchRegion)
 
         if hasDistributedOption:
             pyautogui.press("down")
-            time.sleep(1)
+            time.sleep(keyboard_command_wait_time)
             pyautogui.press("down")
-            time.sleep(1)
+            time.sleep(keyboard_command_wait_time)
             pyautogui.press("down")
-            time.sleep(1)
+            time.sleep(keyboard_command_wait_time)
 
         pyautogui.press("enter")
-        time.sleep(1)
+        time.sleep(keyboard_command_wait_time)
 
         print("Visual Studio build opened and distributed build configuration selected.")
     else:
