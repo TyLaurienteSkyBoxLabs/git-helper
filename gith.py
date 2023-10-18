@@ -480,6 +480,30 @@ def add_shortcut(shortcut_name, shortcut_command, current=False):
 
     print(f"Added shortcut '{shortcut_name}' to profile '{current_profile}'")
 
+def remove_shortcut(shortcut_name, current=False):
+    config = read_gith_config()
+    current_profile = "default"
+
+    if current:
+        current_profile = get_current_profile()
+
+        if current_profile == "default":
+            print("\nError: Cannot delete a profile specific shortcut when using the default profile")
+            return
+        
+    full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
+    
+    if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
+        print(f"\nError: No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
+        return
+    
+    config.remove_option(current_profile, full_shortcut_name)
+
+    with open(GITH_CONFIG_FILE, "w") as config_file:
+        config.write(config_file)
+
+    print(f"\nRemoved shortcut {shortcut_name} from profile {current_profile}")
+
 # Function to replace variables in the command
 def replace_variables(command):
     count = 0
@@ -498,7 +522,7 @@ def execute_shortcut(shortcut_name):
     if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
         current_profile = "default"
         if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
-            print(f"No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
+            print(f"\nError: No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
             return
 
     shortcut_command = config.get(current_profile, full_shortcut_name)
@@ -591,6 +615,10 @@ def init_arg_parser():
     shortcut_parser.add_argument("shortcut_command", help="Command associated with the shortcut")
     shortcut_parser.add_argument("current", nargs="?", default="", help="Option to specify if the shortcut is profile specific")
 
+    shortcut_parser = subparsers.add_parser("remove-shortcut", aliases=["rsc"], help="Remove a shortcut ---- Specify the name of an existing shortcut to remove it")
+    shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
+    shortcut_parser.add_argument("current", nargs="?", default="", help="Option to specify if the shortcut is profile specific")
+
     shortcut_parser = subparsers.add_parser("shortcut", aliases=["sc"], help="Execute a shortcut ---- Specify the name of an existing shortcut to run")
     shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
 
@@ -640,6 +668,9 @@ def main():
     elif args.command == "add-shortcut" or args.command == "asc":
         current = args.current == "current"
         add_shortcut(args.shortcut_name, args.shortcut_command, current)
+    elif args.command == "remove-shortcut" or args.command == "rsc":
+        current = args.current == "current"
+        remove_shortcut(args.shortcut_name, current)
     elif args.command == "shortcut" or args.command == "sc":
         execute_shortcut(args.shortcut_name)
     elif args.command == "add-profile" or args.command == "ap":
