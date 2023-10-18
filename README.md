@@ -75,6 +75,11 @@ gith() {
   * To create a shortcut that can only be used in the current profile, add `current` to the end of the command. Ex: `gith shortcut testName "program Fodler/testProgram.py" current`
   * Note that when using the `current` option, you must not be on the "default" profile. Meaning you must first run the `add-profile` command.
   * Note that if a shortcut exists as both a global and a profile specific, the profile specific command will be used.
+* `gith remove-shortcut $shortcut_name [$current]`
+  * This command will remove an existing shortcut.
+  * To remove a global shortcut, simply run the command with the shortcut name Ex: `gith remove-shortcut testName`
+  * To remove a profile specific shortcut from the current profile, run the command with the shortcut name and add `current` at the end. Ex: `gith remove-shortcut testName current`
+  * Note that when using the `current` option, you must not be on the "default" profile.
 * `gith shortcut $shortcut_name`
   * This command will execute an existing shortcut. 
   * To execute an existing shortcut, simply enter its name when running. Ex: `gith shortcut testName`
