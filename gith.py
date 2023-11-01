@@ -292,7 +292,7 @@ def open_visual_studio_distributed_build(sln_path):
     close_visual_studio_windows()
     time.sleep(2)
 
-    keyboard_command_wait_time = 0.25
+    keyboard_command_wait_time = 0.5
     
     sln_file = sln_path
 
