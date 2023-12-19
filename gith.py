@@ -8,6 +8,31 @@ from typing import IO, NoReturn
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^#short"
 
+# ======= Custom Classes =======
+class CustomArgumentParser(argparse.ArgumentParser):
+    def print_usage(self, file: IO[str] | None = None) -> None:
+        pass
+
+    def error(self, message: str) -> NoReturn:
+        pass
+
+    def format_help(self) -> str:
+        formatter = self._get_formatter()
+
+        # positionals, optionals and user-defined groups
+        for action_group in self._action_groups:
+            if action_group.title == "Commands":
+                formatter.start_section(action_group.title)
+                formatter.add_text(action_group.description)
+                formatter.add_arguments(action_group._group_actions)
+                formatter.end_section()
+
+
+        # determine help from format above
+        return formatter.format_help()
+# ------- End Custom Classes -------
+
+# ======= Configuration File Functions =======
 def clean_path(path):
     path = path.replace('"', '')
     path = path.replace("'", '')
@@ -121,6 +146,20 @@ def set_remote_name(remote_name):
     # Write the updated config
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
+# ------- End Configuration File Functions -------
+
+# ======= Helpers =======
+def run_git_command(args, timeout=50, max_retries=3):
+    args = ["git"] + args
+    output = run_command(args, timeout, max_retries)
+    if (output == "^#FAILURE^#"):
+        return False
+    
+    if "CONFLICT" in output:
+        print("Error: a conflict occured during git command execution, please resolve before proceeding")
+        return False
+
+    return True
 
 def run_command(command, max_time=50, max_retries=3):
     retries = 0
@@ -147,18 +186,6 @@ def get_git_command(args):
     repo_path = get_repo_path()
     return ["git", "-C", repo_path] + args
 
-def run_git_command(args, timeout=50, max_retries=3):
-    args = ["git"] + args
-    output = run_command(args, timeout, max_retries)
-    if (output == "^#FAILURE^#"):
-        return False
-    
-    if "CONFLICT" in output:
-        print("Error: a conflict occured during git command execution, please resolve before proceeding")
-        return False
-
-    return True
-
 def get_current_branch_name():
     repo_path = get_repo_path()
     if not repo_path:
@@ -173,6 +200,73 @@ def get_current_branch_name():
         return None
     
     return None
+
+def get_status_files():
+    # Logic to only add non-submodule changes
+    repo_path = get_repo_path()
+    status_command = ["git", "status"]
+
+    status_files = subprocess.Popen(status_command, cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    status_files, stderr = status_files.communicate()
+    if status_files is not None:
+        status_files = status_files.decode()
+        status_files = status_files.replace("modified:", "")
+        status_files = status_files.split('\n')
+
+        return_files = []
+        for file in status_files:
+            file = file.lstrip()
+            file_path = os.path.join(get_repo_path(), file)
+
+            if os.path.isfile(file_path):
+                return_files.append(file_path)
+
+        return return_files
+    
+    return []
+
+def add_without_submodules():
+    status_files = get_status_files()
+
+    for file in status_files:
+        run_git_command(["add", file])
+
+def remove_duplicate_sections(file_path):
+    pattern = r"\[.*\]"
+
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+
+    with open(file_path, 'w') as f:
+        section_names = set()
+        for line in lines:
+            if re.match(pattern, line):
+                section_name = line.strip()
+                if section_name in section_names:
+                    continue  # Skip duplicate section
+                else:
+                    section_names.add(section_name)
+            f.write(line)
+
+def read_gith_config():
+    config = configparser.ConfigParser()
+    if os.path.exists(GITH_CONFIG_FILE):
+        remove_duplicate_sections(GITH_CONFIG_FILE)
+
+        try:
+            config.read(GITH_CONFIG_FILE)
+        except configparser.MissingSectionHeaderError:
+            # Handle improperly formatted .githconfig file
+            print(f"Invalid .githconfig file. Creating a new one with default section headers.")
+            with open(GITH_CONFIG_FILE, "w") as config_file:
+               config.write(config_file)
+    else:
+        # Create the .githconfig file with a default section header
+        config.add_section("default")
+        with open(GITH_CONFIG_FILE, "w") as config_file:
+            config.write(config_file)
+
+    return config
 
 def clean_submodules():
     # Get the list of submodules
@@ -207,40 +301,22 @@ def clean_non_git_files():
 
     clean_submodules()
 
+# Function to replace variables in the shortcut command
+def replace_variables(command):
+    count = 0
+    while command.find("^#") != -1 and count < 20:
+        count += 1
+        if command.find("^#repo_path") != -1:
+            command = command.replace("^#repo_path", get_repo_path())
+
+    return command
+# ------- End Helpers -------
+
+# ======= Commands =======
 def submodule_command():
     run_git_command(["submodule", "sync"])
     run_git_command(["submodule", "update", "--init", "--recursive"], 550, 0)
     return run_git_command(["submodule", "update", "--init", "--recursive"], 20, 1)
-
-def get_status_files():
-    # Logic to only add non-submodule changes
-    repo_path = get_repo_path()
-    status_command = ["git", "status"]
-
-    status_files = subprocess.Popen(status_command, cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    status_files, stderr = status_files.communicate()
-    if status_files is not None:
-        status_files = status_files.decode()
-        status_files = status_files.replace("modified:", "")
-        status_files = status_files.split('\n')
-
-        return_files = []
-        for file in status_files:
-            file = file.lstrip()
-            file_path = os.path.join(get_repo_path(), file)
-
-            if os.path.isfile(file_path):
-                return_files.append(file_path)
-
-        return return_files
-    
-    return []
-
-def add_without_submodules():
-    status_files = get_status_files()
-
-    for file in status_files:
-        run_git_command(["add", file])
 
 def commit_command(message):
     add_without_submodules()
@@ -384,44 +460,7 @@ def branch_command(branch_name):
     print("\nCleaning non-git files")
     clean_non_git_files()
 
-def remove_duplicate_sections(file_path):
-    pattern = r"\[.*\]"
-
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-
-    with open(file_path, 'w') as f:
-        section_names = set()
-        for line in lines:
-            if re.match(pattern, line):
-                section_name = line.strip()
-                if section_name in section_names:
-                    continue  # Skip duplicate section
-                else:
-                    section_names.add(section_name)
-            f.write(line)
-
-def read_gith_config():
-    config = configparser.ConfigParser()
-    if os.path.exists(GITH_CONFIG_FILE):
-        remove_duplicate_sections(GITH_CONFIG_FILE)
-
-        try:
-            config.read(GITH_CONFIG_FILE)
-        except configparser.MissingSectionHeaderError:
-            # Handle improperly formatted .githconfig file
-            print(f"Invalid .githconfig file. Creating a new one with default section headers.")
-            with open(GITH_CONFIG_FILE, "w") as config_file:
-               config.write(config_file)
-    else:
-        # Create the .githconfig file with a default section header
-        config.add_section("default")
-        with open(GITH_CONFIG_FILE, "w") as config_file:
-            config.write(config_file)
-
-    return config
-
-def add_profile(profile_name, copy=False):
+def add_profile_command(profile_name, copy=False):
     config = read_gith_config()
 
     if config.has_section(profile_name):
@@ -445,7 +484,7 @@ def add_profile(profile_name, copy=False):
     set_current_profile(profile_name)
     print(f"Added new profile: '{profile_name}'")
 
-def switch_profile(profile_name, delete=False):
+def switch_profile_command(profile_name, delete=False):
     config = read_gith_config()
 
     if not config.has_section(profile_name):
@@ -458,7 +497,7 @@ def switch_profile(profile_name, delete=False):
         set_current_profile(profile_name)
         print(f"Switched to profile: '{profile_name}'")
 
-def add_shortcut(shortcut_name, shortcut_command, current=False):
+def add_shortcut_command(shortcut_name, shortcut_command, current=False):
     config = read_gith_config()
     current_profile = "default"
 
@@ -481,7 +520,7 @@ def add_shortcut(shortcut_name, shortcut_command, current=False):
 
     print(f"Added shortcut '{shortcut_name}' to profile '{current_profile}'")
 
-def remove_shortcut(shortcut_name, current=False):
+def remove_shortcut_command(shortcut_name, current=False):
     config = read_gith_config()
     current_profile = "default"
 
@@ -505,17 +544,7 @@ def remove_shortcut(shortcut_name, current=False):
 
     print(f"\nRemoved shortcut {shortcut_name} from profile {current_profile}")
 
-# Function to replace variables in the command
-def replace_variables(command):
-    count = 0
-    while command.find("^#") != -1 and count < 20:
-        count += 1
-        if command.find("^#repo_path") != -1:
-            command = command.replace("^#repo_path", get_repo_path())
-
-    return command
-
-def execute_shortcut(shortcut_name, printError=True):
+def execute_shortcut_command(shortcut_name, printError=True):
     config = read_gith_config()
     current_profile = get_current_profile()
     full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
@@ -535,7 +564,7 @@ def execute_shortcut(shortcut_name, printError=True):
 
     return True
     
-def print_status(all=None):
+def print_status_command(all=None):
     repo_path = get_repo_path()
     branch_name = get_branch_name()
     current_profile = get_current_profile()
@@ -575,29 +604,9 @@ def print_status(all=None):
     print("\nAll profiles:")
     for profile in profiles:
         print(profile)
+# ------- End Commands -------
 
-class CustomArgumentParser(argparse.ArgumentParser):
-    def print_usage(self, file: IO[str] | None = None) -> None:
-        pass
-
-    def error(self, message: str) -> NoReturn:
-        pass
-
-    def format_help(self) -> str:
-        formatter = self._get_formatter()
-
-        # positionals, optionals and user-defined groups
-        for action_group in self._action_groups:
-            if action_group.title == "Commands":
-                formatter.start_section(action_group.title)
-                formatter.add_text(action_group.description)
-                formatter.add_arguments(action_group._group_actions)
-                formatter.end_section()
-
-
-        # determine help from format above
-        return formatter.format_help()
-
+# ======= Main Logic and Argument Parsing =======
 def init_arg_parser():
     parser = CustomArgumentParser(prog="gith", description="Git Helper")
     subparsers = parser.add_subparsers(title="Commands", dest="command")
@@ -668,7 +677,7 @@ def main():
         set_repo_path(args.directory)
         print(f"Repository path set to: {args.directory}")
     elif args.command == "status" or args.command == "s":
-        print_status(args.all)
+        print_status_command(args.all)
     elif args.command == "command" or args.command == "c":
         run_command(args.command_args)
     elif args.command == "sub-init" or args.command == "su":
@@ -693,22 +702,22 @@ def main():
         branch_command(args.name)
     elif args.command == "add-shortcut" or args.command == "asc":
         current = args.current == "current"
-        add_shortcut(args.shortcut_name, args.shortcut_command, current)
+        add_shortcut_command(args.shortcut_name, args.shortcut_command, current)
     elif args.command == "remove-shortcut" or args.command == "rsc":
         current = args.current == "current"
-        remove_shortcut(args.shortcut_name, current)
+        remove_shortcut_command(args.shortcut_name, current)
     elif args.command == "shortcut" or args.command == "sc":
-        execute_shortcut(args.shortcut_name)
+        execute_shortcut_command(args.shortcut_name)
     elif args.command == "add-profile" or args.command == "ap":
-        add_profile(args.name, args.copy)
+        add_profile_command(args.name, args.copy)
     elif args.command == "profile" or args.command == "pr":
-        switch_profile(args.name, args.delete)
+        switch_profile_command(args.name, args.delete)
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
     elif unknown_args:
         unknown_command = unknown_args[0]
-        if not execute_shortcut(unknown_command, False):
+        if not execute_shortcut_command(unknown_command, False):
             print(f"Error: the command '{unknown_command} is not a known command or shortcut, see list below\n")
             parser.print_help()
     else:
@@ -716,3 +725,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# ------- End Main Logic and Argument Parsing -------
