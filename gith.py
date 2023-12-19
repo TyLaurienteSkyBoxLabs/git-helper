@@ -372,10 +372,10 @@ def fetch_command(rebase=False):
 
     if rebase:
         print(f"\nRebasing branch to {main_branch}")
-        passed = run_git_command(["rebase", main_branch])
+        passed = run_git_command(["rebase", main_branch], 300, 0)
     else:
         print(f"\nMerging {main_branch} into {fetch_branch}")
-        passed = run_git_command(["merge", main_branch])
+        passed = run_git_command(["merge", main_branch], 300, 0)
     
     if status_file_count > 0:
         print("\nAuto merging stashed changes")
