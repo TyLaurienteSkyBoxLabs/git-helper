@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import configparser
 import re
+from typing import IO, NoReturn
 
 GITH_CONFIG_FILE = os.path.expanduser("~/.githconfig")
 SHORTCUT_PREFIX = "^#short"
@@ -514,7 +515,7 @@ def replace_variables(command):
 
     return command
 
-def execute_shortcut(shortcut_name):
+def execute_shortcut(shortcut_name, printError=True):
     config = read_gith_config()
     current_profile = get_current_profile()
     full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
@@ -522,14 +523,17 @@ def execute_shortcut(shortcut_name):
     if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
         current_profile = "default"
         if not config.has_section(current_profile) or not config.has_option(current_profile, full_shortcut_name):
-            print(f"\nError: No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
-            return
+            if printError:
+                print(f"\nError: No shortcut found for '{shortcut_name}' in profile '{current_profile}'")
+            return False
 
     shortcut_command = config.get(current_profile, full_shortcut_name)
     shortcut_command = shortcut_command.replace(SHORTCUT_PREFIX, "")
     shortcut_command = replace_variables(shortcut_command)
     print(f"\nExecuting shortcut '{shortcut_name}': {shortcut_command}")
     os.system(shortcut_command)
+
+    return True
     
 def print_status(all=None):
     repo_path = get_repo_path()
@@ -572,8 +576,30 @@ def print_status(all=None):
     for profile in profiles:
         print(profile)
 
+class CustomArgumentParser(argparse.ArgumentParser):
+    def print_usage(self, file: IO[str] | None = None) -> None:
+        pass
+
+    def error(self, message: str) -> NoReturn:
+        pass
+
+    def format_help(self) -> str:
+        formatter = self._get_formatter()
+
+        # positionals, optionals and user-defined groups
+        for action_group in self._action_groups:
+            if action_group.title == "Commands":
+                formatter.start_section(action_group.title)
+                formatter.add_text(action_group.description)
+                formatter.add_arguments(action_group._group_actions)
+                formatter.end_section()
+
+
+        # determine help from format above
+        return formatter.format_help()
+
 def init_arg_parser():
-    parser = argparse.ArgumentParser(prog="gith", description="Git Helper")
+    parser = CustomArgumentParser(prog="gith", description="Git Helper")
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
     repo_parser = subparsers.add_parser("repo", aliases=["r"], help="Set or update the repository path")
@@ -636,7 +662,7 @@ def init_arg_parser():
 
 def main():
     parser = init_arg_parser()
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
     if args.command == "repo" or args.command == "r":
         set_repo_path(args.directory)
@@ -680,6 +706,11 @@ def main():
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
+    elif unknown_args:
+        unknown_command = unknown_args[0]
+        if not execute_shortcut(unknown_command, False):
+            print(f"Error: the command '{unknown_command} is not a known command or shortcut, see list below\n")
+            parser.print_help()
     else:
         parser.print_help()
 

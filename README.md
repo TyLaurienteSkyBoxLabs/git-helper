@@ -71,18 +71,19 @@ gith() {
   * **Be careful**, this command will erase your build files and any other git ignored files
 * `gith add-shortcut $shortcut_name $shortcut_command [$current]`
   * This command creates a new shortcut that can be used in all profiles by default.
-  * To create a new shortcut, enter both a shortcut name, and a command for it. If the command has any spaces in it, make sure to encapsulate it in quotes "". Ex: `gith shortcut testName "program Folder/testProgram.py"`
-  * To create a shortcut that can only be used in the current profile, add `current` to the end of the command. Ex: `gith shortcut testName "program Fodler/testProgram.py" current`
+  * To create a new shortcut, enter both a shortcut name, and a command for it. If the command has any spaces in it, make sure to encapsulate it in quotes "". Ex: `gith shortcut $shortcut_name "program Folder/testProgram.py"`
+  * To create a shortcut that can only be used in the current profile, add `current` to the end of the command. Ex: `gith shortcut $shortcut_name "program Fodler/testProgram.py" current`
   * Note that when using the `current` option, you must not be on the "default" profile. Meaning you must first run the `add-profile` command.
   * Note that if a shortcut exists as both a global and a profile specific, the profile specific command will be used.
 * `gith remove-shortcut $shortcut_name [$current]`
   * This command will remove an existing shortcut.
-  * To remove a global shortcut, simply run the command with the shortcut name Ex: `gith remove-shortcut testName`
-  * To remove a profile specific shortcut from the current profile, run the command with the shortcut name and add `current` at the end. Ex: `gith remove-shortcut testName current`
+  * To remove a global shortcut, simply run the command with the shortcut name Ex: `gith remove-shortcut $shortcut_name`
+  * To remove a profile specific shortcut from the current profile, run the command with the shortcut name and add `current` at the end. Ex: `gith remove-shortcut $shortcut_name current`
   * Note that when using the `current` option, you must not be on the "default" profile.
 * `gith shortcut $shortcut_name`
   * This command will execute an existing shortcut. 
-  * To execute an existing shortcut, simply enter its name when running. Ex: `gith shortcut testName`
+  * To execute an existing shortcut, simply enter its name when running. Ex: `gith shortcut $shortcut_name`
+  * You can also more quickly run shortcuts by simply running `gith $shortcut_name`, without specifying the `shortcut` command at all.
 * `gith add-profile [copy] $name`
   * This command creates a new profile and sets it as our current.
   * Profiles allow differnt repos to be cached so that you can quickly jump between different projects. Shortcuts and mainbranch overrides are also unique to each profile.
