@@ -53,17 +53,19 @@ gith() {
   * This command will do a number of steps to pull latest main into your current checked out branch.
   * This includes: checking out the main branch, fetching changes from remote, resseting local main to remote changes, checking out the previous branch that was checked out, and merging main into that branch.
   * By default, merge is used so as to not be destructive to history, run `git fetch rebase` to rebase instead.
-  * **Be careful**, this command will erase your build files and any other git ignored files
+  * **Be careful**, this command will erase your build files and any other git ignored files.
 * `gith fetch-branch $branch_name`
-  * This command will fetch a remote branch, checkout to the fetch branch and reset the local branch to the remote branch
-  * **Be careful**, this command will erase your build files and any other git ignored files
+  * This command will fetch a remote branch, checkout to the fetch branch and reset the local branch to the remote branch.
+  * **Be careful**, this command will erase your build files and any other git ignored files.
 * `gith main-branch $branch_name`
   * This command allows specifying a different "main" branch name, for projects that don't use "main" as their main branch. This will be used as the base branch for fetching and branching.
 * `gith remote $remote_name`
   * This command allows specifying a different "origin" remote name, for projects that use multiple remotes. This will be used as the base branch for fetching and branching.
+* `gith delete-remote $remote_name`
+  * This command allows for deleting of a remote name for the current selected profile.
 * `gith branch $branch_name`
   * This command will do all of the same steps as fetch, but instead of using the previously checked out branch, it will create a new one off of main using the name specified.
-  * **Be careful**, this command will erase your build files and any other git ignored files
+  * **Be careful**, this command will erase your build files and any other git ignored files.
 * `gith add-shortcut $shortcut_name $shortcut_command [$current]`
   * This command creates a new shortcut that can be used in all profiles by default.
   * To create a new shortcut, enter both a shortcut name, and a command for it. If the command has any spaces in it, make sure to encapsulate it in quotes "". Ex: `gith shortcut $shortcut_name "program Folder/testProgram.py"`
@@ -84,10 +86,11 @@ gith() {
   * Profiles allow for tweaking git helper to be able to run commands for various repos. Profiles allow for overriding of default branch names, which remote to use for pushing and fetching as well as repo specific shortcuts. For example, you may want to have a shortcut named `build` for each of your repos, however, each repo will need a different command implementation to build for that specific project.
   * To create a new profile, type `gith addprofile $profile_name`. This will create a new profile called $profile_name, which will be blank.
   * If you would like to copy the default branch name, remote override and shortcuts from the current profile into the new profile, you can add the `copy` command before the name. Ex: `gith addprofile copy $profile_name`.
-* `gith profile [delete] $profile_name`
+* `gith profile $profile_name`
   * This command allows you to switch between you different profiles. To switch profiles, run `gith profile testProfileName`.
   * Remember that to see all of your profiles, simply enter `gith status all` at any time.
-  * If you would like to delete a profile, you can add the `delete` command before the name. Ex: `gith profile delete testProfileName`
+* `gith delete-profile`
+  * This command allows you to delete the profile that is currently selected. After running this command, the current profile will be set to the default.
 * `gith explorer`
   * This command will open a file explorer in the directory of your current profiles repo.
 
@@ -99,14 +102,14 @@ gith() {
 
 ### Chaining shortcuts
 * You can chain shortcuts together by calling `gith` multiple times within a shortcut. 
-* To do this in command prompt, use the `&&` operator
-* To do this in powershell, use the `;` operator
-* For chaining commands within a shortcut, you have to use the `&&` operator since `gith` uses cmd as its underlying shell
+* To do this in command prompt, use the `&&` operator.
+* To do this in powershell, use the `;` operator.
+* For chaining commands within a shortcut, you have to use the `&&` operator since `gith` uses cmd as its underlying shell.
 * An example of this would be to create a shortcut for building a project solution, lets call this shortcut `build-solution`.
 * Now what if you would like to fetch latest main and build the solution in one command.
 * You can accomplish this by creating another shortcut called `fetch-build-solution`. This can be accomplished using the following command `gith shortcut fetch-build-solution "gith fetch && gith shortcut build-solution`.
 * Now that this shortcut is saved, to run both a fetch and a build-solution, simply run `gith shortcut fetch-build-solution` and it will run both commands.
 
 ### Non-shortcut chaining
-* You can also simply chain commands without creating shortcuts
-* For example, you can run `gith branch testBranchName && gith shortcut win32 && gith shortcut build` (Substitute `&&` for `;` if using Powershell)
+* You can also simply chain commands without creating shortcuts.
+* For example, you can run `gith branch testBranchName && gith shortcut win32 && gith shortcut build` (Substitute `&&` for `;` if using Powershell).

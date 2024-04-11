@@ -51,8 +51,13 @@ def set_current_profile(profile_name):
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
 
-def delete_profile(profile_name):
+def delete_profile():
     config = read_gith_config()
+    profile_name = get_current_profile()
+
+    if profile_name == "default":
+        print("Error: Cannot delete the default profile")
+        return
 
     if not config.has_section(profile_name):
         print(f"Profile '{profile_name}' does not exist.")
@@ -125,6 +130,10 @@ def get_remote_name():
     return "origin"
 
 def set_remote_name(remote_name):
+    if remote_name == "":
+        print("Error: There was no remote name specified")
+        return
+
     config = read_gith_config()
     current_profile = get_current_profile()
 
@@ -132,7 +141,7 @@ def set_remote_name(remote_name):
         config.add_section(current_profile)
 
     # Remove existing branch_name line if present
-    if config.has_option(current_profile, "remote_name"):
+    if config.has_option(current_profile, "remoten_ame"):
         config.remove_option(current_profile, "remote_name")
 
     config.set(current_profile, "remote_name", str(remote_name))
@@ -140,6 +149,23 @@ def set_remote_name(remote_name):
     # Write the updated config
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
+
+    print(f"Remote set to: {remote_name}")
+
+def delete_remote_name():
+    config = read_gith_config()
+    current_profile = get_current_profile()
+
+    if not config.has_section(current_profile):
+        print(f"Error: The '{current_profile}' could not be found")
+        return
+
+    config.remove_option(current_profile, "remote_name")
+
+    with open(GITH_CONFIG_FILE, "w") as config_file:
+        config.write(config_file)
+
+    print(f"Deleted remote for the '{current_profile}' profile")
 # ------- End Configuration File Functions -------
 
 # ======= Helpers =======
@@ -457,6 +483,10 @@ def branch_command(branch_name):
     clean_non_git_files()
 
 def add_profile_command(profile_name, copy):
+    if profile_name == "":
+        print("Error: There was no profile name specified")
+        return
+
     config = read_gith_config()
 
     if config.has_section(profile_name):
@@ -480,18 +510,15 @@ def add_profile_command(profile_name, copy):
     set_current_profile(profile_name)
     print(f"Added new profile: '{profile_name}'")
 
-def switch_profile_command(profile_name, delete=False):
+def switch_profile_command(profile_name):
     config = read_gith_config()
 
     if not config.has_section(profile_name):
         print(f"Profile '{profile_name}' does not exist.")
         return
 
-    if delete:
-        delete_profile(profile_name)
-    else:
-        set_current_profile(profile_name)
-        print(f"Switched to profile: '{profile_name}'")
+    set_current_profile(profile_name)
+    print(f"Switched to profile: '{profile_name}'")
 
 def add_shortcut_command(shortcut_name, shortcut_command, current=False):
     config = read_gith_config()
@@ -630,7 +657,9 @@ def init_arg_parser():
     mainbranch_parser.add_argument("branch", help="Name of the main branch")
 
     remotename_parser = subparsers.add_parser("remote", aliases=["re"], help="Switch to using a different remote (origin by default)")
-    remotename_parser.add_argument("remotename", help="Name of the remote")
+    remotename_parser.add_argument("remotename", default="", help="Name of the remote")
+
+    subparsers.add_parser("delete-remote", aliases=["dr"], help="Delete the remote for the current profile")
 
     branch_parser = subparsers.add_parser("branch", aliases=["b"], help="Create and switch to a new branch")
     branch_parser.add_argument("name", help="Name of the new branch")
@@ -649,11 +678,12 @@ def init_arg_parser():
 
     addprofile_parser = subparsers.add_parser("add-profile", aliases=["ap"], help="Add a new profile ---- gith addprofile [copy]  ----  copy current profile")
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
-    addprofile_parser.add_argument("name", help="Name of the profile")
+    addprofile_parser.add_argument("profile_name", default="", help="Name of the profile")
 
-    switchprofile_parser = subparsers.add_parser("profile", aliases=["pr"], help="Switch to a different profile ---- gith profile [delete]  ----  delete profile")
-    switchprofile_parser.add_argument("delete", nargs="?", default=False, help="Delete a profile")
-    switchprofile_parser.add_argument("name", help="Name of the profile")
+    switchprofile_parser = subparsers.add_parser("profile", aliases=["pr"], help="Switch to a different profile")
+    switchprofile_parser.add_argument("profile_name", default="", help="Name of the profile")
+
+    subparsers.add_parser("delete-profile", aliases=["dp"], help="Delete the currently selected profile")
 
     subparsers.add_parser("explorer", aliases=["e"], help="Open a file explorer in the repo directory")
 
@@ -674,7 +704,8 @@ def main():
         print(f"Main branch set to: {args.branch}")
     elif args.command == "remote" or args.command == "re":
         set_remote_name(args.remotename)
-        print(f"Remote set to: {args.remotename}")
+    elif args.command == "delete-remote" or args.command == "dr":
+        delete_remote_name()
     elif args.command == "commit" or args.command == "co":
         commit_command(args.message)
     elif args.command == "push" or args.command == "p":
@@ -694,10 +725,11 @@ def main():
     elif args.command == "shortcut" or args.command == "sc":
         execute_shortcut_command(args.shortcut_name)
     elif args.command == "add-profile" or args.command == "ap":
-        add_profile_command(args.name, args.copy == "copy")
+        add_profile_command(args.profile_name, args.copy == "copy")
     elif args.command == "profile" or args.command == "pr":
-        delete = args.delete == "delete"
-        switch_profile_command(args.name, delete)
+        switch_profile_command(args.profile_name)
+    elif args.command == "delete-profile" or args.command == "dp":
+        delete_profile()
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
