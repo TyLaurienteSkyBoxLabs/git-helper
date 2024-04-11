@@ -332,7 +332,7 @@ def push_command(force):
     else:
         run_git_command(["push", remote_name, branch_name])
 
-def fetch_command(rebase=False):
+def fetch_command(rebase):
     main_branch = get_branch_name()
     fetch_branch = get_current_branch_name()
     remote_name = get_remote_name()
@@ -460,7 +460,7 @@ def branch_command(branch_name):
     print("\nCleaning non-git files")
     clean_non_git_files()
 
-def add_profile_command(profile_name, copy=False):
+def add_profile_command(profile_name, copy):
     config = read_gith_config()
 
     if config.has_section(profile_name):
@@ -564,7 +564,7 @@ def execute_shortcut_command(shortcut_name, printError=True):
 
     return True
     
-def print_status_command(all=None):
+def print_status_command(all):
     repo_path = get_repo_path()
     branch_name = get_branch_name()
     current_profile = get_current_profile()
@@ -578,7 +578,7 @@ def print_status_command(all=None):
     print(f"Main Branch: {branch_name}")
     print(f"Remote Name: {remote_name}")
 
-    if (all == None):
+    if (all == False):
         return
 
     config = read_gith_config()
@@ -615,7 +615,7 @@ def init_arg_parser():
     repo_parser.add_argument("directory", nargs="?", default=os.getcwd(), help="Path to the git repository")
 
     status_parser = subparsers.add_parser("status", aliases=["s"], help="Show the status of the current profile ---- gith status [all]  ---- display all info")
-    status_parser.add_argument("all", nargs="?", default=None, help="Print shortcuts and all profiles")
+    status_parser.add_argument("all", nargs="?", default="", help="Print shortcuts and all profiles")
 
     command_parser = subparsers.add_parser("command", aliases=["c"], help="Run a shell command in the repo directory")
     command_parser.add_argument("command_args", nargs=argparse.REMAINDER, help="Command and arguments")
@@ -628,10 +628,10 @@ def init_arg_parser():
     commit_parser.add_argument("message", help="Commit message")
 
     push_parser = subparsers.add_parser("push", aliases=["p"], help="Command to push to main branch ---- gith push [force] ---- force push")
-    push_parser.add_argument("force", nargs="?", default=False, help="Force push")
+    push_parser.add_argument("force", nargs="?", default="", help="Force push")
 
     fetch_parser = subparsers.add_parser("fetch", aliases=["f"], help="Fetch latest main and clean non-git files ---- gith fetch [rebase]  ----  rebase instead of merge")
-    fetch_parser.add_argument("rebase", nargs="?", default=False, help="Rebase instead of merge")
+    fetch_parser.add_argument("rebase", nargs="?", default="", help="Rebase instead of merge")
 
     fetch_branch_parser = subparsers.add_parser("fetch-branch", aliases=["fb"], help="Fetch remote branch and checkout that branch, also clean non-git files")
     fetch_branch_parser.add_argument("branch", help="Name of remote branch")
@@ -677,7 +677,7 @@ def main():
         set_repo_path(args.directory)
         print(f"Repository path set to: {args.directory}")
     elif args.command == "status" or args.command == "s":
-        print_status_command(args.all)
+        print_status_command(args.all == "all")
     elif args.command == "command" or args.command == "c":
         run_command(args.command_args)
     elif args.command == "sub-init" or args.command == "su":
@@ -693,9 +693,9 @@ def main():
     elif args.command == "commit" or args.command == "co":
         commit_command(args.message)
     elif args.command == "push" or args.command == "p":
-        push_command(args.force)
+        push_command(args.force == "force")
     elif args.command == "fetch" or args.command == "f":
-        fetch_command(args.rebase)
+        fetch_command(args.rebase == "rebase")
     elif args.command == "fetch-branch" or args.command == "fb":
         fetch_branch_command(args.branch)
     elif args.command == "branch" or args.command == "b":
@@ -709,9 +709,10 @@ def main():
     elif args.command == "shortcut" or args.command == "sc":
         execute_shortcut_command(args.shortcut_name)
     elif args.command == "add-profile" or args.command == "ap":
-        add_profile_command(args.name, args.copy)
+        add_profile_command(args.name, args.copy == "copy")
     elif args.command == "profile" or args.command == "pr":
-        switch_profile_command(args.name, args.delete)
+        delete = args.delete == "delete"
+        switch_profile_command(args.name, delete)
     elif args.command == "explorer" or args.command == "e":
         repo_path = get_repo_path()
         os.system(f"explorer {repo_path}")
