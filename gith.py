@@ -69,13 +69,7 @@ def delete_profile(profile_name):
     print(f"Deleted profile: '{profile_name}'")
 
 def get_repo_path():
-    config = read_gith_config()
-    current_profile = get_current_profile()
-
-    if config.has_option(current_profile, "repo_path"):
-        return clean_path(config.get(current_profile, "repo_path"))
-
-    return None
+    return clean_path(os.getcwd())
 
 def set_repo_path(repo_path):
     config = read_gith_config()
@@ -613,14 +607,8 @@ def init_arg_parser():
     parser = CustomArgumentParser(prog="gith", description="Git Helper")
     subparsers = parser.add_subparsers(title="Commands", dest="command")
 
-    repo_parser = subparsers.add_parser("repo", aliases=["r"], help="Set or update the repository path")
-    repo_parser.add_argument("directory", nargs="?", default=os.getcwd(), help="Path to the git repository")
-
     status_parser = subparsers.add_parser("status", aliases=["s"], help="Show the status of the current profile ---- gith status [all]  ---- display all info")
     status_parser.add_argument("all", nargs="?", default="", help="Print shortcuts and all profiles")
-
-    command_parser = subparsers.add_parser("command", aliases=["c"], help="Run a shell command in the repo directory")
-    command_parser.add_argument("command_args", nargs=argparse.REMAINDER, help="Command and arguments")
 
     subparsers.add_parser("sub-init", aliases=["su"], help="Initialize and update Git submodules recursively")
 
@@ -675,13 +663,8 @@ def main():
     parser = init_arg_parser()
     args, unknown_args = parser.parse_known_args()
 
-    if args.command == "repo" or args.command == "r":
-        set_repo_path(args.directory)
-        print(f"Repository path set to: {args.directory}")
-    elif args.command == "status" or args.command == "s":
+    if args.command == "status" or args.command == "s":
         print_status_command(args.all == "all")
-    elif args.command == "command" or args.command == "c":
-        run_command(args.command_args)
     elif args.command == "sub-init" or args.command == "su":
         submodule_command()
     elif args.command == "clean" or args.command == "cl":

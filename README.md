@@ -36,14 +36,9 @@ gith() {
 
 ### Usage:
 [ ] *indicates optional parameter*
-* `gith repo [directory]`
-  * Sets the git repo directory for the current profile, this will be cached for every time you begin using the tool.
-  * If no $directory path is passed in, the repo directory will default to your current shells current working directory
 * `gith status [all]`
   * Displays information about your current profile and current repo
   * Run `gith status all` to display extra information, such as a list of your profiles and the shortcuts that exist in your current profile.
-* `gith command $command`
-  * Runs a shell command to the repo directory that's in your current profile. This works from anywhere so you don't have to cd into your repo directory. Ex: `gith command git rebase -i main`
 * `gith sub-init`
   * This command will update your submodules by running `git submodule update --init --recursive`
 * `gith clean`
@@ -86,9 +81,9 @@ gith() {
   * You can also more quickly run shortcuts by simply running `gith $shortcut_name`, without specifying the `shortcut` command at all.
 * `gith add-profile [copy] $name`
   * This command creates a new profile and sets it as our current.
-  * Profiles allow differnt repos to be cached so that you can quickly jump between different projects. Shortcuts and mainbranch overrides are also unique to each profile.
-  * To create a new profile, type `gith addprofile testProfileName`. This will create a new profile called testProfileName which will be blank.
-  * If you would like to copy the current shortcuts, repo path and mainbranch override to the new profile, you can add the `copy` command before the name. Ex: `gith addprofile copy testProfileName`.
+  * Profiles allow for tweaking git helper to be able to run commands for various repos. Profiles allow for overriding of default branch names, which remote to use for pushing and fetching as well as repo specific shortcuts. For example, you may want to have a shortcut named `build` for each of your repos, however, each repo will need a different command implementation to build for that specific project.
+  * To create a new profile, type `gith addprofile $profile_name`. This will create a new profile called $profile_name, which will be blank.
+  * If you would like to copy the default branch name, remote override and shortcuts from the current profile into the new profile, you can add the `copy` command before the name. Ex: `gith addprofile copy $profile_name`.
 * `gith profile [delete] $profile_name`
   * This command allows you to switch between you different profiles. To switch profiles, run `gith profile testProfileName`.
   * Remember that to see all of your profiles, simply enter `gith status all` at any time.
@@ -99,7 +94,7 @@ gith() {
 ### Shortcut macros
 * Shortcut macros allow for certain characters to be interpreted by `gith` to insert certain values.
 * `^#repo_path`
-  * If this text is specified in a shortcut, the text `^#repo_path` will be substituted for the repo directory that is in the current profile
+  * If this text is specified in a shortcut, the text `^#repo_path` will be substituted for the current working directory that you are calling gith from.
   * An example of a shortcut that makes use of this is: `gith shortcut start-build "python ^#repo_path/project_gen/start_build.py`
 
 ### Chaining shortcuts
