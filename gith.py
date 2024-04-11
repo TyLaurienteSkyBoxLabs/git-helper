@@ -176,6 +176,8 @@ def run_command(command, max_time=50, max_retries=3):
                 continue
             else:
                 break
+        except FileNotFoundError:
+            print(f"Error: '{command} is not valid command, cannot find file")
         
         return output
             
