@@ -104,6 +104,10 @@ def get_branch_name():
     return "main"
 
 def set_branch_name(branch_name):
+    if branch_name == "":
+        print("Error: The branch name was not specified")
+        return
+
     config = read_gith_config()
     current_profile = get_current_profile()
 
@@ -119,6 +123,8 @@ def set_branch_name(branch_name):
     # Write the updated config
     with open(GITH_CONFIG_FILE, "w") as config_file:
         config.write(config_file)
+    
+    print(f"Main branch set to: {branch_name}")
 
 def get_remote_name():
     config = read_gith_config()
@@ -341,6 +347,10 @@ def submodule_command():
     return run_git_command(["submodule", "update", "--init", "--recursive"], 20, 1)
 
 def commit_command(message):
+    if message == "":
+        print("Error: The commit message was not specified")
+        return
+
     add_without_submodules()
             
     run_git_command(["commit", "-m", clean_path(message)])
@@ -418,6 +428,10 @@ def fetch_command(rebase):
     clean_non_git_files()
 
 def fetch_branch_command(fetch_branch):
+    if fetch_branch == "":
+        print("Error: The branch name to fetch was not specified")
+        return
+
     remote_name = get_remote_name()
     
     print(f"Fetching fetch branch: {fetch_branch}")
@@ -440,6 +454,10 @@ def fetch_branch_command(fetch_branch):
     clean_non_git_files()
 
 def branch_command(branch_name):
+    if branch_name == "":
+        print("Error: The branch name was not specified")
+        return
+
     main_branch = get_branch_name()
     remote_name = get_remote_name()
     passed = False
@@ -511,6 +529,10 @@ def add_profile_command(profile_name, copy):
     print(f"Added new profile: '{profile_name}'")
 
 def switch_profile_command(profile_name):
+    if profile_name == "":
+        print("Error: The profile name was not specified")
+        return
+    
     config = read_gith_config()
 
     if not config.has_section(profile_name):
@@ -521,6 +543,13 @@ def switch_profile_command(profile_name):
     print(f"Switched to profile: '{profile_name}'")
 
 def add_shortcut_command(shortcut_name, shortcut_command, current=False):
+    if shortcut_name == "":
+        print("Error: The shortcut name was not specified")
+        return
+    elif shortcut_command == "":
+        print("Error: The shortcut command was not specified")
+        return
+
     config = read_gith_config()
     current_profile = "default"
 
@@ -544,6 +573,10 @@ def add_shortcut_command(shortcut_name, shortcut_command, current=False):
     print(f"Added shortcut '{shortcut_name}' to profile '{current_profile}'")
 
 def remove_shortcut_command(shortcut_name, current=False):
+    if shortcut_name == "":
+        print("Error: The shortcut name was not specified")
+        return
+
     config = read_gith_config()
     current_profile = "default"
 
@@ -568,6 +601,10 @@ def remove_shortcut_command(shortcut_name, current=False):
     print(f"\nRemoved shortcut {shortcut_name} from profile {current_profile}")
 
 def execute_shortcut_command(shortcut_name, printError=True):
+    if shortcut_name == "":
+        print("Error: The shortcut name was not specified")
+        return
+
     config = read_gith_config()
     current_profile = get_current_profile()
     full_shortcut_name = SHORTCUT_PREFIX + shortcut_name
@@ -642,7 +679,7 @@ def init_arg_parser():
     subparsers.add_parser("clean", aliases=["cl"], help="Clean non-git files (-ffdx)")
 
     commit_parser = subparsers.add_parser("commit", aliases=["co"], help="Method which takes a commit message, adds untracked changes and commits ---- gith commit $commit_message")
-    commit_parser.add_argument("message", help="Commit message")
+    commit_parser.add_argument("message", default="", help="Commit message")
 
     push_parser = subparsers.add_parser("push", aliases=["p"], help="Command to push to main branch ---- gith push [force] ---- force push")
     push_parser.add_argument("force", nargs="?", default="", help="Force push")
@@ -651,10 +688,10 @@ def init_arg_parser():
     fetch_parser.add_argument("rebase", nargs="?", default="", help="Rebase instead of merge")
 
     fetch_branch_parser = subparsers.add_parser("fetch-branch", aliases=["fb"], help="Fetch remote branch and checkout that branch, also clean non-git files")
-    fetch_branch_parser.add_argument("branch", help="Name of remote branch")
+    fetch_branch_parser.add_argument("branch", default="", help="Name of remote branch")
 
     mainbranch_parser = subparsers.add_parser("main-branch", aliases=["mb"], help="Set the main branch name")
-    mainbranch_parser.add_argument("branch", help="Name of the main branch")
+    mainbranch_parser.add_argument("branch", default="", help="Name of the main branch")
 
     remotename_parser = subparsers.add_parser("remote", aliases=["re"], help="Switch to using a different remote (origin by default)")
     remotename_parser.add_argument("remotename", default="", help="Name of the remote")
@@ -662,19 +699,19 @@ def init_arg_parser():
     subparsers.add_parser("delete-remote", aliases=["dr"], help="Delete the remote for the current profile")
 
     branch_parser = subparsers.add_parser("branch", aliases=["b"], help="Create and switch to a new branch")
-    branch_parser.add_argument("name", help="Name of the new branch")
+    branch_parser.add_argument("name", default="", help="Name of the new branch")
 
     shortcut_parser = subparsers.add_parser("add-shortcut", aliases=["asc"], help="Add a new shortcut ---- Specify a name as well as a command for the shortcut")
-    shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
-    shortcut_parser.add_argument("shortcut_command", help="Command associated with the shortcut")
+    shortcut_parser.add_argument("shortcut_name", default="", help="Name of the shortcut")
+    shortcut_parser.add_argument("shortcut_command", default="", help="Command associated with the shortcut")
     shortcut_parser.add_argument("current", nargs="?", default="", help="Option to specify if the shortcut is profile specific")
 
     shortcut_parser = subparsers.add_parser("remove-shortcut", aliases=["rsc"], help="Remove a shortcut ---- Specify the name of an existing shortcut to remove it")
-    shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
+    shortcut_parser.add_argument("shortcut_name", default="", help="Name of the shortcut")
     shortcut_parser.add_argument("current", nargs="?", default="", help="Option to specify if the shortcut is profile specific")
 
     shortcut_parser = subparsers.add_parser("shortcut", aliases=["sc"], help="Execute a shortcut ---- Specify the name of an existing shortcut to run")
-    shortcut_parser.add_argument("shortcut_name", help="Name of the shortcut")
+    shortcut_parser.add_argument("shortcut_name", default="", help="Name of the shortcut")
 
     addprofile_parser = subparsers.add_parser("add-profile", aliases=["ap"], help="Add a new profile ---- gith addprofile [copy]  ----  copy current profile")
     addprofile_parser.add_argument("copy", nargs="?", default=False, help="Copy current profile")
@@ -701,7 +738,6 @@ def main():
         clean_non_git_files()
     elif args.command == "main-branch" or args.command == "mb":
         set_branch_name(args.branch)
-        print(f"Main branch set to: {args.branch}")
     elif args.command == "remote" or args.command == "re":
         set_remote_name(args.remotename)
     elif args.command == "delete-remote" or args.command == "dr":
