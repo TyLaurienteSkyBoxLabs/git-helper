@@ -256,7 +256,7 @@ def wait_for_vs_load(search_region):
     # Specify the text to search for
     debugger_redy_text = "Debugger"
     extracted_text = ""
-    timeout_time = 40
+    timeout_time = 180
     start_time = time.time()
     
     while not (debugger_redy_text.lower() in extracted_text.lower()):
